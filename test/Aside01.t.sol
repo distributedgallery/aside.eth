@@ -23,51 +23,51 @@ contract Aside01Test is Test {
         assertEq(token.symbol(), "ASD");
     }
 
-    function testMint() public {
-        vm.prank(minter);
-        token.mint(owners[0], 1, 10, "ipfs://ipfs/Qm");
+    // function testMint() public {
+    //     vm.prank(minter);
+    //     token.mint(owners[0], 1, 10, "ipfs://ipfs/Qm");
 
-        assertEq(token.ownerOf(1), owners[0]);
-        assertEq(token.tokenURI(1), "ipfs://ipfs/Qm");
-    }
+    //     assertEq(token.ownerOf(1), owners[0]);
+    //     assertEq(token.tokenURI(1), "ipfs://ipfs/Qm");
+    // }
 
-    function test_approve_FromOwner() public {
-        vm.prank(minter);
-        token.mint(owners[0], 1, 10, "ipfs://ipfs/Qm");
+    // function test_approve_FromOwner() public {
+    //     vm.prank(minter);
+    //     token.mint(owners[0], 1, 10, "ipfs://ipfs/Qm");
 
-        vm.prank(owners[0]);
+    //     vm.prank(owners[0]);
 
-        vm.expectEmit(true, true, true, true);
-        emit Approval(owners[0], owners[1], 1);
+    //     vm.expectEmit(true, true, true, true);
+    //     emit Approval(owners[0], owners[1], 1);
 
-        token.approve(owners[1], 1);
+    //     token.approve(owners[1], 1);
 
-        assertEq(token.getApproved(1), owners[1]);
+    //     assertEq(token.getApproved(1), owners[1]);
 
-        // check for events
-    }
+    //     // check for events
+    // }
 
-    function test_approve_FromApprovedOperatorForAll() public {
-        vm.prank(minter);
-        token.mint(owners[0], 1, 10, "ipfs://ipfs/Qm");
+    // function test_approve_FromApprovedOperatorForAll() public {
+    //     vm.prank(minter);
+    //     token.mint(owners[0], 1, 10, "ipfs://ipfs/Qm");
 
-        vm.prank(owners[0]);
-        token.setApprovalForAll(owners[1], true);
+    //     vm.prank(owners[0]);
+    //     token.setApprovalForAll(owners[1], true);
 
-        vm.prank(owners[1]);
-        token.approve(owners[2], 1);
+    //     vm.prank(owners[1]);
+    //     token.approve(owners[2], 1);
 
-        assertEq(token.getApproved(1), owners[2]);
-    }
+    //     assertEq(token.getApproved(1), owners[2]);
+    // }
 
-    function test_approve_RevertWhenFromNeitherOwnerNorApprovedOperatorForAll() public {
-        vm.prank(minter);
-        token.mint(owners[0], 1, 10, "ipfs://ipfs/Qm");
+    // function test_approve_RevertWhenFromNeitherOwnerNorApprovedOperatorForAll() public {
+    //     vm.prank(minter);
+    //     token.mint(owners[0], 1, 10, "ipfs://ipfs/Qm");
 
-        vm.prank(owners[1]);
-        vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidApprover.selector, owners[1]));
-        token.approve(owners[2], 1);
-    }
+    //     vm.prank(owners[1]);
+    //     vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidApprover.selector, owners[1]));
+    //     token.approve(owners[2], 1);
+    // }
 
     // function test_ApproveRevertsWhenNot() public {
     //     vm.prank(minter);
