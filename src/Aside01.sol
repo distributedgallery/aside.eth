@@ -6,10 +6,10 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
-error TokenLocked();
-
 /// @custom:security-contact contact@distributedgallery.art
 contract Aside0x01 is ERC721, ERC721URIStorage, ERC721Burnable, AccessControl {
+    error TokenLocked(uint256 tokenId);
+
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     mapping(uint256 => uint256) private _timelocks;
@@ -36,7 +36,7 @@ contract Aside0x01 is ERC721, ERC721URIStorage, ERC721Burnable, AccessControl {
 
     function _update(address to, uint256 tokenId, address auth) internal override(ERC721) returns (address) {
         if (!transferIsAllowed(tokenId)) {
-            revert TokenLocked();
+            revert TokenLocked(tokenId);
         }
         return super._update(to, tokenId, auth);
     }

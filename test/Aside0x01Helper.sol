@@ -23,7 +23,7 @@ abstract contract TestHelper is Test {
         token.mint(owners[2], 2, timelocks[2], tokenURIs[2]);
     }
 
-    function unlock() public {
+    function moveToUnlock() public {
         vm.warp(block.timestamp + timelocks[0] + timelocks[1] + timelocks[2] + 1);
     }
 }
