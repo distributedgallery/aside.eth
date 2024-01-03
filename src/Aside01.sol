@@ -6,28 +6,42 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
+error TokenLocked();
+
 /// @custom:security-contact contact@distributedgallery.art
 contract Aside0x01 is ERC721, ERC721URIStorage, ERC721Burnable, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+
+    mapping(uint256 => uint256) private _timelocks;
 
     constructor(address admin, address minter) ERC721("Aside0x01", "ASD") {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(MINTER_ROLE, minter);
     }
 
-    function safeMint(address to, uint256 tokenId, string memory uri) public onlyRole(MINTER_ROLE) {
-        _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
-    }
-
     function mint(address to, uint256 tokenId, uint256 timelock, string memory uri) public onlyRole(MINTER_ROLE) {
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
+        _timelocks[tokenId] = block.timestamp + timelock;
         // your implementation
     }
 
-    // The following functions are overrides required by Solidity.
+    function timelocks(uint256 tokenId) public view returns (uint256) {
+        return _timelocks[tokenId];
+    }
 
+    function transferIsAllowed(uint256 tokenId) public view returns (bool) {
+        return (_ownerOf(tokenId) == address(0) || _timelocks[tokenId] <= block.timestamp);
+    }
+
+    function _update(address to, uint256 tokenId, address auth) internal override(ERC721) returns (address) {
+        if (!transferIsAllowed(tokenId)) {
+            revert TokenLocked();
+        }
+        return super._update(to, tokenId, auth);
+    }
+
+    // The following functions are overrides required by Solidity.
     function tokenURI(uint256 tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
         return super.tokenURI(tokenId);
     }
