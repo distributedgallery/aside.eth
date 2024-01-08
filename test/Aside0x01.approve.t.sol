@@ -4,6 +4,15 @@ pragma solidity ^0.8.13;
 import {TestHelper} from "./Aside0x01Helper.sol";
 import {IERC721Errors} from "../src/Aside01.sol";
 
+/*
+    Gives permission to to to transfer tokenId token to another account. The approval is cleared when the token is transferred.
+    Only a single account can be approved at a time, so approving the zero address clears previous approvals.
+
+    Requirements:
+    - The caller must own the token or be an approved operator.
+    - tokenId must exist.
+    - Emits an Approval event.
+*/
 contract Approve is TestHelper {
     event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
 

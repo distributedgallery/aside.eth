@@ -19,6 +19,13 @@ contract Aside0x01 is ERC721, ERC721URIStorage, ERC721Burnable, AccessControl {
         _grantRole(MINTER_ROLE, minter);
     }
 
+    /**
+     *
+     * @param to The address to receive the token.
+     * @param tokenId The token id.
+     * @param timelock The timelock duration in seconds.
+     * @param uri The token URI.
+     */
     function mint(address to, uint256 tokenId, uint256 timelock, string memory uri) public onlyRole(MINTER_ROLE) {
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
@@ -26,10 +33,19 @@ contract Aside0x01 is ERC721, ERC721URIStorage, ERC721Burnable, AccessControl {
         // your implementation
     }
 
+    /**
+     *
+     * @param tokenId The token id.
+     */
     function timelocks(uint256 tokenId) public view returns (uint256) {
         return _timelocks[tokenId];
     }
 
+    /**
+     * @dev Checks if the transfer of a specific token is allowed.
+     * @param tokenId The ID of the token to check.
+     * @return A boolean indicating whether the transfer is allowed or not.
+     */
     function transferIsAllowed(uint256 tokenId) public view returns (bool) {
         return (_ownerOf(tokenId) == address(0) || _timelocks[tokenId] <= block.timestamp);
     }

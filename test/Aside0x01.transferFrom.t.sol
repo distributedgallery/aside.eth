@@ -4,6 +4,17 @@ pragma solidity ^0.8.13;
 import {TestHelper} from "./Aside0x01Helper.sol";
 import {Aside0x01, IERC721Errors} from "../src/Aside01.sol";
 
+/*
+ * Transfers tokenId token from from to to.
+ *
+ * Note that the caller is responsible to confirm that the recipient is capable of receiving ERC721 or else they may be permanently lost. Usage of safeTransferFrom prevents loss, though the caller must understand this adds an external call which potentially creates a reentrancy vulnerability.
+ * Requirements:
+ *  - from cannot be the zero address.
+ *  - to cannot be the zero address.
+ *  - tokenId token must be owned by from.
+ *  - If the caller is not from, it must be approved to move this token by either approve or setApprovalForAll.
+ *  - Emits a Transfer event.
+*/
 contract Transfer is TestHelper {
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
 
