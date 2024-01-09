@@ -16,8 +16,6 @@ import {Aside0x01, IERC721Errors} from "../src/Aside01.sol";
  *  - Emits a Transfer event.
 */
 contract Transfer is TestHelper {
-    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
-
     function test_transferFrom() public {
         moveToUnlock();
         vm.prank(owners[0]);

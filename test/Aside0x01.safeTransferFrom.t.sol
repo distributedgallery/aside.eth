@@ -53,8 +53,6 @@ contract NonERC721Recipient {}
  *  - Emits a Transfer event.
 */
 contract Transfer is TestHelper {
-    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
-
     function test_safeTransferFromToEAO() public mint unlock {
         vm.prank(owner);
         token.setApprovalForAll(address(this), true);

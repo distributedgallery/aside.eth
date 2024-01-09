@@ -2,14 +2,19 @@
 pragma solidity ^0.8.13;
 
 import {Test, console2} from "forge-std/Test.sol";
-import {Aside0x01, IERC721Errors} from "../src/Aside01.sol";
+import {Aside0x01, IERC721Errors, IAccessControl} from "../src/Aside01.sol";
 
 abstract contract TestHelper is Test {
+    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
+    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
+    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
+
     Aside0x01 public token;
     address[3] public owners = [address(1), address(2), address(3)];
     address owner = address(9);
     uint256 tokenId = 12;
     address operator = address(73);
+    address approved = address(99);
     address public recipient = address(10);
     uint256[3] public tokens = [0, 1, 2];
     uint256[3] public timelocks = [154, 48239, 124443];
