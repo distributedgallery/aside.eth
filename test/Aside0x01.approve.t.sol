@@ -42,7 +42,7 @@ contract Approve is TestHelper {
         token.approve(approved, tokenId);
     }
 
-    function test_RevertWhen_ApproveNonExistentToken() public mint {
+    function test_RevertWhen_ApproveNonexistentToken() public mint {
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, 9999));
         token.approve(approved, 9999);
     }

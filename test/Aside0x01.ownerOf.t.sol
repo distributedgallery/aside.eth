@@ -14,7 +14,7 @@ contract OwnerOf is TestHelper {
     }
 
     function test_RevertWhen_OwnerOfNonexistentToken() public {
-        vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, 9999));
-        token.ownerOf(9999);
+        vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, tokenId));
+        token.ownerOf(tokenId);
     }
 }

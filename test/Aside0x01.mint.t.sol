@@ -1,15 +1,63 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {TestHelper, IAccessControl} from "./Aside0x01Helper.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import {
+    TestHelper,
+    IAccessControl,
+    IERC721Errors,
+    ERC721Recipient,
+    RevertingERC721Recipient,
+    WrongReturnDataERC721Recipient,
+    NonERC721Recipient
+} from "./Aside0x01Helper.sol";
 
 contract Mint is TestHelper {
-    function test_Mint() public {
+    function test_MintToEOA() public {
         vm.prank(minter);
         token.mint(owner, tokenId, timelock, tokenURI);
 
         assertEq(token.balanceOf(owner), 1);
         assertEq(token.ownerOf(tokenId), owner);
+    }
+
+    function test_MintToERC721Recipient() public {
+        ERC721Recipient to = new ERC721Recipient();
+
+        vm.prank(minter);
+        token.mint(address(to), tokenId, timelock, tokenURI);
+
+        assertEq(token.balanceOf(address(to)), 1);
+        assertEq(token.ownerOf(tokenId), address(to));
+
+        assertEq(to.operator(), minter);
+        assertEq(to.from(), address(0));
+        assertEq(to.id(), tokenId);
+        assertEq(to.data(), "");
+    }
+
+    function test_RevertWhen_MintToRevertingERC721Recipient() public {
+        RevertingERC721Recipient to = new RevertingERC721Recipient();
+
+        vm.prank(minter);
+        vm.expectRevert(abi.encodeWithSelector(IERC721Receiver.onERC721Received.selector));
+        token.mint(address(to), tokenId, timelock, tokenURI);
+    }
+
+    function test_RevertWhen_MintToNonERC721Recipient() public {
+        NonERC721Recipient to = new NonERC721Recipient();
+
+        vm.prank(minter);
+        vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidReceiver.selector, address(to)));
+        token.mint(address(to), tokenId, timelock, tokenURI);
+    }
+
+    function test_RevertWhen_MintToRevertingERC721RecipientWithWrongReturnData() public {
+        WrongReturnDataERC721Recipient to = new WrongReturnDataERC721Recipient();
+
+        vm.prank(minter);
+        vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidReceiver.selector, address(to)));
+        token.mint(address(to), tokenId, timelock, tokenURI);
     }
 
     function test_RevertWhen_MintFromUnauthorized() public {
@@ -18,6 +66,18 @@ contract Mint is TestHelper {
                 IAccessControl.AccessControlUnauthorizedAccount.selector, address(this), token.MINTER_ROLE()
             )
         );
+        token.mint(owner, tokenId, timelock, tokenURI);
+    }
+
+    function test_RevertWhen_MintToZeroAddress() public {
+        vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidReceiver.selector, address(0)));
+        vm.prank(minter);
+        token.mint(address(0), tokenId, timelock, tokenURI);
+    }
+
+    function test_RevertWhen_DoubleMint() public mint unlock {
+        vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidSender.selector, address(0)));
+        vm.prank(minter);
         token.mint(owner, tokenId, timelock, tokenURI);
     }
 }

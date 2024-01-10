@@ -8,7 +8,7 @@ import {TestHelper, IERC721Errors} from "./Aside0x01Helper.sol";
  *
  * Requirements:
  *  - The caller must own `tokenId` or be an approved operator.
- *  - tokenId must exist.
+ *  - `tokenId` must exist.
  *
  * Emits a Transfer event.
  */
@@ -59,5 +59,18 @@ contract Burn is TestHelper {
 
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, tokenId));
         token.ownerOf(tokenId);
+    }
+
+    function test_RevertWhen_BurnFromNeitherOwnerNorApprovedOperator() public mint unlock {
+        vm.expectRevert(
+            abi.encodeWithSelector(IERC721Errors.ERC721InsufficientApproval.selector, address(this), tokenId)
+        );
+        token.burn(tokenId);
+    }
+
+    function test_RevertWhen_BurnNonexistentToken() public {
+        vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, tokenId));
+        vm.prank(owner);
+        token.burn(tokenId);
     }
 }
