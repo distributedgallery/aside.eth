@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {TestHelper, IERC721Errors} from "./Aside0x01Helper.sol";
+import {TestHelper, Aside0x01, IERC721Errors} from "./Aside0x01Helper.sol";
 
 /**
  * Burns `tokenId`. The approval is cleared when the token is burned.
@@ -26,7 +26,7 @@ contract Burn is TestHelper {
         token.ownerOf(tokenId);
     }
 
-    function test_BurnFromApprovedOperator() public mint unlock {
+    function test_BurnFromApproved() public mint unlock {
         vm.prank(owner);
         token.approve(operator, tokenId);
 
@@ -45,7 +45,7 @@ contract Burn is TestHelper {
         token.ownerOf(tokenId);
     }
 
-    function test_BurnFromApprovedOperatorForAll() public mint unlock {
+    function test_BurnFromOperator() public mint unlock {
         vm.prank(owner);
         token.setApprovalForAll(operator, true);
 
@@ -61,7 +61,7 @@ contract Burn is TestHelper {
         token.ownerOf(tokenId);
     }
 
-    function test_RevertWhen_BurnFromNeitherOwnerNorApprovedOperator() public mint unlock {
+    function test_RevertWhen_BurnFromUnauthorized() public mint unlock {
         vm.expectRevert(
             abi.encodeWithSelector(IERC721Errors.ERC721InsufficientApproval.selector, address(this), tokenId)
         );
@@ -70,6 +70,12 @@ contract Burn is TestHelper {
 
     function test_RevertWhen_BurnNonexistentToken() public {
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, tokenId));
+        vm.prank(owner);
+        token.burn(tokenId);
+    }
+
+    function test_RevertWhen_BurnLockedToken() public mint {
+        vm.expectRevert(abi.encodeWithSelector(Aside0x01.TokenLocked.selector, tokenId));
         vm.prank(owner);
         token.burn(tokenId);
     }

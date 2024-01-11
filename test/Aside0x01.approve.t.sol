@@ -24,7 +24,7 @@ contract Approve is TestHelper {
         assertEq(token.getApproved(tokenId), approved);
     }
 
-    function test_ApproveFromAuthorizedOperator() public mint {
+    function test_ApproveFromOperator() public mint {
         vm.prank(owner);
         token.setApprovalForAll(operator, true);
 
@@ -37,13 +37,13 @@ contract Approve is TestHelper {
         assertEq(token.getApproved(tokenId), approved);
     }
 
-    function test_RevertWhen_ApproveFromNeitherOwnerAuthorizedOperator() public mint {
+    function test_RevertWhen_ApproveFromUnauthorized() public mint {
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidApprover.selector, address(this)));
         token.approve(approved, tokenId);
     }
 
-    function test_RevertWhen_ApproveNonexistentToken() public mint {
-        vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, 9999));
-        token.approve(approved, 9999);
+    function test_RevertWhen_ApproveNonexistentToken() public {
+        vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, tokenId));
+        token.approve(approved, tokenId);
     }
 }

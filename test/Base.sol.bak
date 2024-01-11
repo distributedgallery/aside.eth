@@ -116,18 +116,6 @@ contract ERC721Test is DSTestPlus {
         assertBytesEq(recipient.data(), "testing 123");
     }
 
-    function testFailApproveUnMinted() public {
-        token.approve(address(0xBEEF), 1337);
-    }
-
-    function testFailApproveUnAuthorized() public {
-        token.mint(address(0xCAFE), 1337);
-
-        token.approve(address(0xBEEF), 1337);
-    }
-
-
-
     function testFailSafeTransferFromToNonERC721Recipient() public {
         token.mint(address(this), 1337);
 

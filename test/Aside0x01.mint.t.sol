@@ -12,13 +12,21 @@ import {
     NonERC721Recipient
 } from "./Aside0x01Helper.sol";
 
+/**
+ * Mints `tokenId`, transfers it to to and checks for to acceptance.
+ *
+ * Requirements:
+ *  - `tokenId` must not exist.
+ *  - If to refers to a smart contract, it must implement IERC721Receiver.onERC721Received, which is called upon a safe transfer.
+ * 
+ * Emits a Transfer event.
+ */
 contract Mint is TestHelper {
-    function test_MintToEOA() public {
-        vm.prank(minter);
-        token.mint(owner, tokenId, timelock, tokenURI);
-
+    function test_MintToEOA() public mint {
         assertEq(token.balanceOf(owner), 1);
         assertEq(token.ownerOf(tokenId), owner);
+        assertEq(token.timelocks(tokenId), timelock);
+        assertEq(token.tokenURI(tokenId), tokenURI);
     }
 
     function test_MintToERC721Recipient() public {
@@ -29,6 +37,8 @@ contract Mint is TestHelper {
 
         assertEq(token.balanceOf(address(to)), 1);
         assertEq(token.ownerOf(tokenId), address(to));
+        assertEq(token.timelocks(tokenId), timelock);
+        assertEq(token.tokenURI(tokenId), tokenURI);
 
         assertEq(to.operator(), minter);
         assertEq(to.from(), address(0));
@@ -39,24 +49,24 @@ contract Mint is TestHelper {
     function test_RevertWhen_MintToRevertingERC721Recipient() public {
         RevertingERC721Recipient to = new RevertingERC721Recipient();
 
-        vm.prank(minter);
         vm.expectRevert(abi.encodeWithSelector(IERC721Receiver.onERC721Received.selector));
+        vm.prank(minter);
         token.mint(address(to), tokenId, timelock, tokenURI);
     }
 
     function test_RevertWhen_MintToNonERC721Recipient() public {
         NonERC721Recipient to = new NonERC721Recipient();
 
-        vm.prank(minter);
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidReceiver.selector, address(to)));
+        vm.prank(minter);
         token.mint(address(to), tokenId, timelock, tokenURI);
     }
 
     function test_RevertWhen_MintToRevertingERC721RecipientWithWrongReturnData() public {
         WrongReturnDataERC721Recipient to = new WrongReturnDataERC721Recipient();
 
-        vm.prank(minter);
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidReceiver.selector, address(to)));
+        vm.prank(minter);
         token.mint(address(to), tokenId, timelock, tokenURI);
     }
 
