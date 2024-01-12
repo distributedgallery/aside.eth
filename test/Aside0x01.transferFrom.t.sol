@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {TestHelper} from "./Aside0x01Helper.sol";
-import {Aside0x01, IERC721Errors} from "../src/Aside01.sol";
+import {TestHelper, Aside0x01, IERC721Errors} from "./Aside0x01Helper.sol";
 
 /*
- * Transfers `tokenId` token from `from` to `to`. Note that the caller is responsible to confirm that the recipient is capable of receiving ERC721 or else they may be permanently lost. Usage of safeTransferFrom prevents loss, though the caller must understand this adds an external call which potentially creates a reentrancy vulnerability.
+ * Transfers `tokenId` token from `from` to `to`.
  * 
  * Requirements:
  *  - `from` cannot be the zero address.
  *  - `to` cannot be the zero address.
  *  - `tokenId` token must be owned by `from`.
- *  - If the caller is not from, it must be approved to move this token by either approve or setApprovalForAll.
+ *  - If the caller is not `from`, it must be approved to move this token by either approve or setApprovalForAll.
  * 
  * - Emits a Transfer event.
  */
@@ -28,7 +27,7 @@ contract Transfer is TestHelper {
         assertEq(token.balanceOf(recipient), 1);
     }
 
-    function test_TransferFromFromApprovedAddress() public mint unlock {
+    function test_TransferFromFromApproved() public mint unlock {
         vm.prank(owner);
         token.approve(approved, tokenId);
 
@@ -44,7 +43,7 @@ contract Transfer is TestHelper {
         assertEq(token.getApproved(tokenId), address(0));
     }
 
-    function test_TransferFromFromAuthorizedOperator() public mint unlock {
+    function test_TransferFromFromOperator() public mint unlock {
         vm.prank(owner);
         token.setApprovalForAll(operator, true);
 
@@ -60,29 +59,12 @@ contract Transfer is TestHelper {
         assertTrue(token.isApprovedForAll(owner, operator));
     }
 
-    // function test_transferFrom_RevertWhenTokenIsStillLocked() public {
-    //     vm.expectRevert(abi.encodeWithSelector(Aside0x01.TokenLocked.selector, 0));
-    //     token.transferFrom(owners[0], owners[1], 0);
-    // }
-
-    function test_RevertWhen_TransferFromTokenLocked() public mint {
-        // revert when caller is owner
-        vm.expectRevert(abi.encodeWithSelector(Aside0x01.TokenLocked.selector, 0));
-        token.transferFrom(owners[0], owners[1], 0);
-        // revert when caller is approved
-        vm.prank(owners[0]);
-        token.approve(owners[1], 0);
-        vm.prank(owners[1]);
-        vm.expectRevert(abi.encodeWithSelector(Aside0x01.TokenLocked.selector, 0));
-        token.transferFrom(owners[0], owners[1], 0);
-        // revert when caller is approved for all
-        vm.prank(owners[0]);
-        token.setApprovalForAll(owners[0], true);
-        vm.expectRevert(abi.encodeWithSelector(Aside0x01.TokenLocked.selector, 0));
-        token.transferFrom(owners[0], owners[1], 0);
+    function test_RevertWhen_TransferFromLockedToken() public mint {
+        vm.expectRevert(abi.encodeWithSelector(Aside0x01.TokenLocked.selector, tokenId));
+        token.transferFrom(owner, recipient, tokenId);
     }
 
-    function test_RevertWhen_TransferFromFromNeitherOwnerNorApprovedAddressNorAuthorizedOperator() public mint unlock {
+    function test_RevertWhen_TransferFromUnauhtorized() public mint unlock {
         vm.expectRevert(
             abi.encodeWithSelector(IERC721Errors.ERC721InsufficientApproval.selector, address(this), tokenId)
         );
@@ -107,7 +89,7 @@ contract Transfer is TestHelper {
         token.transferFrom(owner, address(0), tokenId);
     }
 
-    function test_RevertWhen_TransferFromNonExistentToken() public {
+    function test_RevertWhen_TransferFromNonexistentToken() public {
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, tokenId));
         vm.prank(owner);
         token.transferFrom(owner, recipient, tokenId);

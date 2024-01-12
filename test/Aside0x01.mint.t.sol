@@ -18,14 +18,14 @@ import {
  * Requirements:
  *  - `tokenId` must not exist.
  *  - If to refers to a smart contract, it must implement IERC721Receiver.onERC721Received, which is called upon a safe transfer.
- * 
+ *
  * Emits a Transfer event.
  */
 contract Mint is TestHelper {
     function test_MintToEOA() public mint {
         assertEq(token.balanceOf(owner), 1);
         assertEq(token.ownerOf(tokenId), owner);
-        assertEq(token.timelocks(tokenId), timelock);
+        assertEq(token.timelocks(tokenId), block.timestamp + timelock);
         assertEq(token.tokenURI(tokenId), tokenURI);
     }
 
@@ -37,7 +37,7 @@ contract Mint is TestHelper {
 
         assertEq(token.balanceOf(address(to)), 1);
         assertEq(token.ownerOf(tokenId), address(to));
-        assertEq(token.timelocks(tokenId), timelock);
+        assertEq(token.timelocks(tokenId), block.timestamp + timelock);
         assertEq(token.tokenURI(tokenId), tokenURI);
 
         assertEq(to.operator(), minter);
