@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {TestHelper, Aside0x01, IERC721Errors} from "./Aside0x01Helper.sol";
+import {TestHelper, Aside0x01, IERC721Errors} from "./Aside0x01Helper.t.sol";
 
 /*
  * Transfers `tokenId` token from `from` to `to`.

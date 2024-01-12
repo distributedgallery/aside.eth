@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {TestHelper, IERC721Errors} from "./Aside0x01Helper.sol";
+import {TestHelper, IERC721Errors} from "./Aside0x01Helper.t.sol";
 
 /*
  * Approve or remove operator as an operator for the caller. Operators can call `transferFrom` or `safeTransferFrom` for any token owned by the caller.

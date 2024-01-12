@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {TestHelper, IERC721Errors} from "./Aside0x01Helper.sol";
+import {TestHelper, IERC721Errors} from "./Aside0x01Helper.t.sol";
 
 /*
  * Gives permission to `to` to transfer `tokenId` token to another account. The approval is cleared when the token is transferred.

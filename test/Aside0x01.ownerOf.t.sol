@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {TestHelper, IERC721Errors} from "./Aside0x01Helper.sol";
+import {TestHelper, IERC721Errors} from "./Aside0x01Helper.t.sol";
 
 /**
- * Returns the owner of the tokenId token.
+ * Returns the owner of the `tokenId` token.
+ *
  * Requirements:
  *  - `tokenId` must exist.
  */

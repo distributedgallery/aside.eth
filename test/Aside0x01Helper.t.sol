@@ -24,21 +24,33 @@ contract ERC721Recipient is IERC721Receiver {
 
         return IERC721Receiver.onERC721Received.selector;
     }
+
+    // exclude this contract from coverage report
+    function test() public {}
 }
 
 contract RevertingERC721Recipient is IERC721Receiver {
     function onERC721Received(address, address, uint256, bytes calldata) public virtual override returns (bytes4) {
         revert(string(abi.encodePacked(IERC721Receiver.onERC721Received.selector)));
     }
+
+    // exclude this contract from coverage report
+    function test() public {}
 }
 
 contract WrongReturnDataERC721Recipient is IERC721Receiver {
     function onERC721Received(address, address, uint256, bytes calldata) public virtual override returns (bytes4) {
         return 0xCAFEBEEF;
     }
+
+    // exclude this contract from coverage report
+    function test() public {}
 }
 
-contract NonERC721Recipient {}
+contract NonERC721Recipient {
+    // exclude this contract from coverage report
+    function test() public {}
+}
 
 abstract contract TestHelper is Test {
     event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
@@ -70,4 +82,7 @@ abstract contract TestHelper is Test {
     function setUp() public {
         token = new Aside0x01(admin, minter);
     }
+
+    // exclude this contract from coverage report
+    function test() public {}
 }

@@ -10,7 +10,7 @@ import {
     RevertingERC721Recipient,
     WrongReturnDataERC721Recipient,
     NonERC721Recipient
-} from "./Aside0x01Helper.sol";
+} from "./Aside0x01Helper.t.sol";
 
 /*
  * Safely transfers `tokenId` token from `from` to `to`.
