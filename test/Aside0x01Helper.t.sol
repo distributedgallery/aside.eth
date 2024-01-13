@@ -68,6 +68,11 @@ abstract contract TestHelper is Test {
     uint256 timelock = 4324;
     string tokenURI = "ipfs://ipfs/Qm/1";
 
+    // Sepolia Chainlink Function parameters. See :
+    // https://docs.chain.link/chainlink-functions/supported-networks
+    address router = 0xb83E47C2bC239B3bf370bc41e1459A34b41238D0;
+    bytes32 donID = 0x66756e2d657468657265756d2d7365706f6c69612d3100000000000000000000;
+
     modifier mint() {
         vm.prank(minter);
         token.mint(owner, tokenId, timelock, tokenURI);
@@ -80,7 +85,7 @@ abstract contract TestHelper is Test {
     }
 
     function setUp() public {
-        token = new Aside0x01(admin, minter);
+        token = new Aside0x01(admin, minter, router, donID);
     }
 
     // exclude this contract from coverage report
