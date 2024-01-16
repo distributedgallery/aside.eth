@@ -25,7 +25,6 @@ contract Mint is TestHelper {
     function test_MintToEOA() public mint {
         assertEq(token.balanceOf(owner), 1);
         assertEq(token.ownerOf(tokenId), owner);
-        assertEq(token.timelocks(tokenId), block.timestamp + timelock);
         assertEq(token.tokenURI(tokenId), tokenURI);
     }
 
@@ -33,11 +32,10 @@ contract Mint is TestHelper {
         ERC721Recipient to = new ERC721Recipient();
 
         vm.prank(minter);
-        token.mint(address(to), tokenId, timelock, tokenURI);
+        token.mint(address(to), tokenId, sentiment, tokenURI);
 
         assertEq(token.balanceOf(address(to)), 1);
         assertEq(token.ownerOf(tokenId), address(to));
-        assertEq(token.timelocks(tokenId), block.timestamp + timelock);
         assertEq(token.tokenURI(tokenId), tokenURI);
 
         assertEq(to.operator(), minter);
@@ -51,7 +49,7 @@ contract Mint is TestHelper {
 
         vm.expectRevert(abi.encodeWithSelector(IERC721Receiver.onERC721Received.selector));
         vm.prank(minter);
-        token.mint(address(to), tokenId, timelock, tokenURI);
+        token.mint(address(to), tokenId, sentiment, tokenURI);
     }
 
     function test_RevertWhen_MintToNonERC721Recipient() public {
@@ -59,7 +57,7 @@ contract Mint is TestHelper {
 
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidReceiver.selector, address(to)));
         vm.prank(minter);
-        token.mint(address(to), tokenId, timelock, tokenURI);
+        token.mint(address(to), tokenId, sentiment, tokenURI);
     }
 
     function test_RevertWhen_MintToRevertingERC721RecipientWithWrongReturnData() public {
@@ -67,7 +65,7 @@ contract Mint is TestHelper {
 
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidReceiver.selector, address(to)));
         vm.prank(minter);
-        token.mint(address(to), tokenId, timelock, tokenURI);
+        token.mint(address(to), tokenId, sentiment, tokenURI);
     }
 
     function test_RevertWhen_MintFromUnauthorized() public {
@@ -76,18 +74,18 @@ contract Mint is TestHelper {
                 IAccessControl.AccessControlUnauthorizedAccount.selector, address(this), token.MINTER_ROLE()
             )
         );
-        token.mint(owner, tokenId, timelock, tokenURI);
+        token.mint(owner, tokenId, sentiment, tokenURI);
     }
 
     function test_RevertWhen_MintToZeroAddress() public {
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidReceiver.selector, address(0)));
         vm.prank(minter);
-        token.mint(address(0), tokenId, timelock, tokenURI);
+        token.mint(address(0), tokenId, sentiment, tokenURI);
     }
 
     function test_RevertWhen_DoubleMint() public mint unlock {
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidSender.selector, address(0)));
         vm.prank(minter);
-        token.mint(owner, tokenId, timelock, tokenURI);
+        token.mint(owner, tokenId, sentiment, tokenURI);
     }
 }
