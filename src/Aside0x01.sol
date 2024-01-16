@@ -37,7 +37,7 @@ contract Aside0x01 is AsideFunctions, ERC721, ERC721URIStorage, ERC721Burnable, 
     mapping(uint256 => bool) private _unlocks; // tokenId => isUnlocked
     mapping(uint256 => uint256) private _sentimentOf; // tokenId => sentiment
     mapping(bytes32 => uint256) private _tokenIdOf; // requestId => tokenId
-    string private source =
+    string private _source =
         "const response = await Functions.makeHttpRequest({url: 'https://aside-js.vercel.app/api/aisentiment', method: 'GET'});if (response.error) {throw Error('Request failed');}return Functions.encodeUint256(response.data.sentiment.toFixed(2)*100);";
 
     /**
@@ -52,6 +52,7 @@ contract Aside0x01 is AsideFunctions, ERC721, ERC721URIStorage, ERC721Burnable, 
         ERC721("Aside0x01", "ASD")
     {
         if (subscriptionId_ == 0) revert InvalidSubscriptionId(subscriptionId_);
+        _setSubscriptionId(subscriptionId_);
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(MINTER_ROLE, minter);
         LOCK_DEADLINE = block.timestamp + TIMELOCK;
@@ -85,7 +86,7 @@ contract Aside0x01 is AsideFunctions, ERC721, ERC721URIStorage, ERC721Burnable, 
         if (_isUnlocked(tokenId)) revert TokenUnlocked(tokenId);
 
         FunctionsRequest.Request memory req;
-        req.initializeRequestForInlineJavaScript(source);
+        req.initializeRequestForInlineJavaScript(_source);
         _currentRequestId = _sendRequest(req.encodeCBOR(), _subscriptionId, CALLBACK_GAS_LIMIT, _donId);
         _tokenIdOf[_currentRequestId] = tokenId;
     }
@@ -110,36 +111,28 @@ contract Aside0x01 is AsideFunctions, ERC721, ERC721URIStorage, ERC721Burnable, 
         emit Unlock(tokenId, sentiment);
     }
 
-    // function fulfillRequest2(bytes32 requestId, bytes memory response, bytes memory err) public {
-    //     if (oracle.lastRequestId != requestId) {
-    //         // Check if request IDs match
-    //     }
-    //     // Update the contract's state variables with the response and any errors
-    //     oracle.lastResponse = response;
-    //     sentiment.value = uint256(bytes32(response));
-    //     sentiment.timestamp = block.timestamp;
-    //     oracle.lastError = err;
+    function setSubscriptionId(uint64 subscriptionId_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (subscriptionId_ == 0) revert InvalidSubscriptionId(subscriptionId_);
 
-    //     // Emit an event to log the response
-    //     emit Response(requestId, uint256(bytes32(response)), response, err);
-    // }
+        _setSubscriptionId(subscriptionId_);
+    }
 
-    // #region SentimentGetters
+    // #region Getters
+    function subscriptionId() public view returns (uint64) {
+        return _subscriptionId;
+    }
+
     function sentimentOf(uint256 tokenId) public view returns (uint256) {
+        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
+
         return _sentimentOf[tokenId];
     }
-    // #endregion
 
-    function tokenIdOfRequest(bytes32 requestId) public view returns (uint256) {
-        return _tokenIdOf[requestId];
-    }
-    // #region LockGetters
     /**
      * @dev Checks whether token `tokenId` is unlocked or not.
      * @param tokenId The id of the token to check.
      * @return A boolean indicating whether the token is unlocked or not.
      */
-
     function isUnlocked(uint256 tokenId) public view returns (bool) {
         return _isUnlocked(tokenId);
     }
@@ -156,6 +149,9 @@ contract Aside0x01 is AsideFunctions, ERC721, ERC721URIStorage, ERC721Burnable, 
         return _eUnlocked || block.timestamp >= LOCK_DEADLINE;
     }
     // #endregion
+    // #endregion
+
+    // #region LockGetters
 
     function _update(address to, uint256 tokenId, address auth) internal override(ERC721) returns (address) {
         if (_ownerOf(tokenId) != address(0) && !_isUnlocked(tokenId)) {
@@ -183,13 +179,7 @@ contract Aside0x01 is AsideFunctions, ERC721, ERC721URIStorage, ERC721Burnable, 
         _setDonId(donId_);
     }
 
-    function setSubscriptionId(uint64 subscriptionId_) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setSubscriptionId(subscriptionId_);
-    }
-
     function _setSubscriptionId(uint64 subscriptionId_) private {
-        if (subscriptionId_ == 0) revert InvalidSubscriptionId(subscriptionId_);
-
         _subscriptionId = subscriptionId_;
     }
     // #endregion

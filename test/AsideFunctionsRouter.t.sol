@@ -34,7 +34,7 @@ contract AsideFunctionsRouter is IFunctionsRouter {
         uint32 callbackGasLimit,
         bytes32 donId
     ) external returns (bytes32) {
-        emit RequestReceived(subscriptionId, data, dataVersion, callbackGasLimit, donId);
+        emit RequestReceived(subscriptionId, data, uint16(1), callbackGasLimit, donId);
         return REQUEST_ID;
     }
 

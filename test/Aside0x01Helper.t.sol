@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {Test} from "forge-std/Test.sol";
 import {Aside0x01, IERC721Errors, IAccessControl} from "../src/Aside0x01.sol";
 import {AsideFunctionsRouter} from "./AsideFunctionsRouter.t.sol";
+import {FunctionsRequest} from "../lib/chainlink/contracts/src/v0.8/functions/dev/1_0_0/libraries/FunctionsRequest.sol";
 
 contract ERC721Recipient is IERC721Receiver {
     address public operator;
@@ -57,6 +58,9 @@ abstract contract TestHelper is Test {
     event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
     event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
+    event RequestReceived(
+        uint64 subscriptionId, bytes data, uint16 dataVersion, uint32 callbackGasLimit, bytes32 donId
+    );
 
     Aside0x01 token;
     AsideFunctionsRouter router;
@@ -71,7 +75,8 @@ abstract contract TestHelper is Test {
     uint64 subscriptionId = 1;
     bytes32 donId = 0x66756e2d657468657265756d2d7365706f6c69612d3100000000000000000000;
     string tokenURI = "ipfs://ipfs/Qm/1";
-
+    string public source =
+        "const response = await Functions.makeHttpRequest({url: 'https://aside-js.vercel.app/api/aisentiment', method: 'GET'});if (response.error) {throw Error('Request failed');}return Functions.encodeUint256(response.data.sentiment.toFixed(2)*100);";
     // Sepolia Chainlink Function parameters. See :
     // https://docs.chain.link/chainlink-functions/supported-networks
     // address router = 0xb83E47C2bC239B3bf370bc41e1459A34b41238D0;
