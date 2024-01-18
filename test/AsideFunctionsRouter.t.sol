@@ -63,7 +63,11 @@ contract AsideFunctionsRouter is IFunctionsRouter {
     function fulfillRequest(IFunctionsClient client, bytes32 requestId, bytes memory response, bytes memory err)
         external
     {
-        client.handleOracleFulfillment(requestId, response, err);
+        try client.handleOracleFulfillment(requestId, response, err) {
+            // success
+        } catch Error(string memory reason) {
+            revert(reason);
+        }
     }
 
     function isValidCallbackGasLimit(uint64, /*subscriptionId*/ uint32 /*callbackGasLimit*/ ) external pure {

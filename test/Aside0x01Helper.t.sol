@@ -73,6 +73,7 @@ abstract contract TestHelper is Test {
     uint256 tokenId = 1;
     uint256 sentiment = 60;
     uint64 subscriptionId = 1;
+    bytes32 requestId = bytes32(uint256(0x01));
     bytes32 donId = 0x66756e2d657468657265756d2d7365706f6c69612d3100000000000000000000;
     string tokenURI = "ipfs://ipfs/Qm/1";
     string public source =
@@ -89,13 +90,17 @@ abstract contract TestHelper is Test {
     }
 
     modifier unlock() {
-        vm.warp(block.timestamp + 1000 days);
+        _unlock();
         _;
     }
 
     function setUp() public {
         router = new AsideFunctionsRouter();
         token = new Aside0x01(admin, minter, address(router), donId, subscriptionId);
+    }
+
+    function _unlock() internal {
+        vm.warp(block.timestamp + 1000 days);
     }
 
     // exclude this contract from coverage report

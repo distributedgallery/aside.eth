@@ -101,6 +101,8 @@ contract Aside0x01 is AsideFunctions, ERC721, ERC721URIStorage, ERC721Burnable, 
         if (requestId != _currentRequestId) revert InvalidRequestId(_currentRequestId, requestId); // check if requests match
         if (err.length > 0) revert RequestError(err); // check if there is an error in the request
         uint256 tokenId = _tokenIdOf[requestId];
+        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
+        if (_isUnlocked(tokenId)) revert TokenUnlocked(tokenId);
         uint256 sentiment = uint256(bytes32(response));
         uint256 expectedSentiment = _sentimentOf[tokenId];
         if (sentiment < expectedSentiment || sentiment >= expectedSentiment + SENTIMENT_INTERVAL) {
