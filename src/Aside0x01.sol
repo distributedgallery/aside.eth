@@ -5,9 +5,6 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-// import {FunctionsClient} from "chainlink/contracts/src/v0.8/functions/dev/1_0_0/FunctionsClient.sol";
-// import {ConfirmedOwner} from "chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
-// import {FunctionsRequest} from "chainlink/contracts/src/v0.8/functions/dev/1_0_0/libraries/FunctionsRequest.sol";
 import {AsideFunctions, FunctionsRequest} from "./AsideFunctions.sol";
 
 /// @custom:security-contact contact@distributedgallery.art

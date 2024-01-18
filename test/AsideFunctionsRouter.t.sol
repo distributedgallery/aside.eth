@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {IFunctionsRouter} from "../lib/chainlink/contracts/src/v0.8/functions/dev/1_0_0/interfaces/IFunctionsRouter.sol";
-import {IFunctionsClient} from "../lib/chainlink/contracts/src/v0.8/functions/dev/1_0_0/interfaces/IFunctionsClient.sol";
-import {FunctionsResponse} from
-    "../lib/chainlink/contracts/src/v0.8/functions/dev/1_0_0/libraries/FunctionsResponse.sol";
+import {IFunctionsRouter} from "../lib/chainlink/contracts/src/v0.8/functions/v1_0_0/interfaces/IFunctionsRouter.sol";
+import {IFunctionsClient} from "../lib/chainlink/contracts/src/v0.8/functions/v1_0_0/interfaces/IFunctionsClient.sol";
+import {FunctionsResponse} from "../lib/chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsResponse.sol";
 
 // @title Chainlink Functions Router interface.
 

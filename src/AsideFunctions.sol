@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {FunctionsClient} from "chainlink/contracts/src/v0.8/functions/dev/1_0_0/FunctionsClient.sol";
-import {FunctionsRequest} from "chainlink/contracts/src/v0.8/functions/dev/1_0_0/libraries/FunctionsRequest.sol";
+import {FunctionsClient} from "chainlink/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
+import {FunctionsRequest} from "chainlink/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
 
 /// @custom:security-contact contact@distributedgallery.art
 abstract contract AsideFunctions is FunctionsClient {

@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {Test} from "forge-std/Test.sol";
 import {Aside0x01, IERC721Errors, IAccessControl} from "../src/Aside0x01.sol";
 import {AsideFunctionsRouter} from "./AsideFunctionsRouter.t.sol";
-import {FunctionsRequest} from "../lib/chainlink/contracts/src/v0.8/functions/dev/1_0_0/libraries/FunctionsRequest.sol";
+import {FunctionsRequest} from "../lib/chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
 
 contract ERC721Recipient is IERC721Receiver {
     address public operator;
