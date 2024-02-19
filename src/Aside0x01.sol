@@ -22,7 +22,6 @@ contract Aside0x01 is IAsideErrors, AsideFunctions, ERC721, ERC721URIStorage, ER
     uint32 public constant CALLBACK_GAS_LIMIT = 100_000;
     uint256 private immutable LOCK_DEADLINE;
 
-    uint64 private _subscriptionId;
     bool private _eUnlocked = false; // emergency unlock
     mapping(uint256 => bool) private _unlocks; // tokenId => isUnlocked
     mapping(uint256 => uint256) private _sentiments; // tokenId => sentiment
@@ -38,10 +37,9 @@ contract Aside0x01 is IAsideErrors, AsideFunctions, ERC721, ERC721URIStorage, ER
      * @param donId_ The ID of the Chainlink Functions DON.
      */
     constructor(address admin, address minter, address router_, bytes32 donId_, uint64 subscriptionId_)
-        AsideFunctions(router_, donId_)
+        AsideFunctions(router_, donId_, subscriptionId_)
         ERC721("Aside0x01", "ASD")
     {
-        _setSubscriptionId(subscriptionId_);
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(MINTER_ROLE, minter);
         LOCK_DEADLINE = block.timestamp + TIMELOCK;
@@ -127,14 +125,6 @@ contract Aside0x01 is IAsideErrors, AsideFunctions, ERC721, ERC721URIStorage, ER
     }
 
     /**
-     * @notice Sets the Chainlink Functions subscription id.
-     * @param subscriptionId_ The id of the Chainlink Functions subscription.
-     */
-    function setSubscriptionId(uint64 subscriptionId_) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setSubscriptionId(subscriptionId_);
-    }
-
-    /**
      * @notice Sets the source of the Chainlink Functions call.
      * @param source_ The source of the Chainlink Functions call.
      */
@@ -154,6 +144,13 @@ contract Aside0x01 is IAsideErrors, AsideFunctions, ERC721, ERC721URIStorage, ER
      */
     function setDonId(bytes32 donId_) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _setDonId(donId_);
+    }
+
+    /**
+     * @inheritdoc AsideFunctions
+     */
+    function setSubscriptionId(uint64 subscriptionId_) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setSubscriptionId(subscriptionId_);
     }
     // #endregion
 
@@ -187,14 +184,6 @@ contract Aside0x01 is IAsideErrors, AsideFunctions, ERC721, ERC721URIStorage, ER
     }
 
     /**
-     * @notice Returns the Chainlink Functions subscription id.
-     * @return The id of the Chainlink Functions subscription.
-     */
-    function subscriptionId() public view returns (uint64) {
-        return _subscriptionId;
-    }
-
-    /**
      * @notice Returns the source of the Chainlink Functions call.
      * @return The source of the Chainlink Functions call.
      */
@@ -221,7 +210,6 @@ contract Aside0x01 is IAsideErrors, AsideFunctions, ERC721, ERC721URIStorage, ER
     function tokenIdOf(bytes32 requestId) public view returns (uint256) {
         return _tokenIds[requestId];
     }
-
     // #endregion
 
     // #region private / internal functions
@@ -231,12 +219,6 @@ contract Aside0x01 is IAsideErrors, AsideFunctions, ERC721, ERC721URIStorage, ER
 
     function _isUnlocked(uint256 tokenId) private view returns (bool) {
         return _unlocks[tokenId] || _areAllUnlocked();
-    }
-
-    function _setSubscriptionId(uint64 subscriptionId_) private {
-        if (subscriptionId_ == 0) revert InvalidSubscriptionId();
-
-        _subscriptionId = subscriptionId_;
     }
 
     function _setSource(string memory source_) private {

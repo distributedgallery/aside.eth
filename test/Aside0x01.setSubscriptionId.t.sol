@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {TestHelper, IAsideErrors, IAccessControl} from "./Aside0x01Helper.t.sol";
+import {TestHelper, AsideFunctions, IAccessControl} from "./Aside0x01Helper.t.sol";
 
 /**
  * Reviewed: OK.
@@ -22,7 +22,7 @@ contract SetSubscriptionId is TestHelper {
 
     function test_RevertWhen_setSubscriptionIdToInvalidId() public {
         vm.prank(admin);
-        vm.expectRevert(abi.encodeWithSelector(IAsideErrors.InvalidSubscriptionId.selector));
+        vm.expectRevert(abi.encodeWithSelector(AsideFunctions.InvalidSubscriptionId.selector));
         token.setSubscriptionId(uint64(0));
     }
 }
