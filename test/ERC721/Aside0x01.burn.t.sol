@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {TestHelper, Aside0x01, IERC721Errors} from "./Aside0x01Helper.t.sol";
+import {TestHelper, Aside0x01, IAsideErrors, IERC721Errors} from "../Aside0x01Helper.t.sol";
 
 /**
  * Burns `tokenId`. The approval is cleared when the token is burned.
@@ -75,7 +75,7 @@ contract Burn is TestHelper {
     }
 
     function test_RevertWhen_BurnLockedToken() public mint {
-        vm.expectRevert(abi.encodeWithSelector(Aside0x01.TokenLocked.selector, tokenId));
+        vm.expectRevert(abi.encodeWithSelector(IAsideErrors.TokenLocked.selector, tokenId));
         vm.prank(owner);
         token.burn(tokenId);
     }

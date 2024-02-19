@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {TestHelper, Aside0x01, IERC721Errors, FunctionsRequest} from "./Aside0x01Helper.t.sol";
+import {TestHelper, Aside0x01, IAsideErrors, IERC721Errors, FunctionsRequest} from "./Aside0x01Helper.t.sol";
 
 contract RequestUnlock is TestHelper {
     using FunctionsRequest for FunctionsRequest.Request;
@@ -28,7 +28,7 @@ contract RequestUnlock is TestHelper {
         FunctionsRequest.Request memory req;
         req.initializeRequestForInlineJavaScript(source);
 
-        vm.expectRevert(abi.encodeWithSelector(Aside0x01.TokenUnlocked.selector, tokenId));
+        vm.expectRevert(abi.encodeWithSelector(IAsideErrors.TokenUnlocked.selector, tokenId));
         token.requestUnlock(tokenId);
     }
 }

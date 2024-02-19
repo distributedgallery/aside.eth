@@ -4,13 +4,14 @@ pragma solidity ^0.8.13;
 import {
     TestHelper,
     Aside0x01,
+    IAsideErrors,
     IERC721Errors,
     IERC721Receiver,
     ERC721Recipient,
     RevertingERC721Recipient,
     WrongReturnDataERC721Recipient,
     NonERC721Recipient
-} from "./Aside0x01Helper.t.sol";
+} from "../Aside0x01Helper.t.sol";
 
 /*
  * Safely transfers `tokenId` token from `from` to `to`.
@@ -175,7 +176,7 @@ contract Transfer is TestHelper {
     }
 
     function test_RevertWhen_SafeTransferFromLockedToken() public mint {
-        vm.expectRevert(abi.encodeWithSelector(Aside0x01.TokenLocked.selector, tokenId));
+        vm.expectRevert(abi.encodeWithSelector(IAsideErrors.TokenLocked.selector, tokenId));
         vm.prank(owner);
         token.safeTransferFrom(owner, recipient, tokenId);
     }

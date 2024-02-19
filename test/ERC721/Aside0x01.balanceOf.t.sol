@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {TestHelper, IERC721Errors} from "./Aside0x01Helper.t.sol";
+import {TestHelper, IERC721Errors} from "../Aside0x01Helper.t.sol";
 
 /**
  * Returns the number of tokens in `owner`'s account.

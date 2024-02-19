@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {TestHelper, Aside0x01, IERC721Errors} from "./Aside0x01Helper.t.sol";
+import {TestHelper, IAsideErrors, IERC721Errors} from "../Aside0x01Helper.t.sol";
 
 /*
  * Transfers `tokenId` token from `from` to `to`.
@@ -60,7 +60,7 @@ contract Transfer is TestHelper {
     }
 
     function test_RevertWhen_TransferFromLockedToken() public mint {
-        vm.expectRevert(abi.encodeWithSelector(Aside0x01.TokenLocked.selector, tokenId));
+        vm.expectRevert(abi.encodeWithSelector(IAsideErrors.TokenLocked.selector, tokenId));
         token.transferFrom(owner, recipient, tokenId);
     }
 

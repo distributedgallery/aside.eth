@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {Test} from "forge-std/Test.sol";
-import {Aside0x01, IERC721Errors, IAccessControl} from "../src/Aside0x01.sol";
+import {Aside0x01, IAsideErrors, AsideFunctions, IERC721Errors, IAccessControl} from "../src/Aside0x01.sol";
 import {AsideFunctionsRouter} from "./AsideFunctionsRouter.t.sol";
 import {FunctionsRequest} from "../lib/chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
 
@@ -61,6 +61,7 @@ abstract contract TestHelper is Test {
     event RequestReceived(
         uint64 subscriptionId, bytes data, uint16 dataVersion, uint32 callbackGasLimit, bytes32 donId
     );
+    event EmergencyUnlock(bool unlocked);
 
     Aside0x01 token;
     AsideFunctionsRouter router;

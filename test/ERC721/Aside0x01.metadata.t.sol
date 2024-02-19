@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {TestHelper} from "./Aside0x01Helper.t.sol";
+import {TestHelper} from "../Aside0x01Helper.t.sol";
 
 contract Metadata is TestHelper {
     function test_Metadata() public {
