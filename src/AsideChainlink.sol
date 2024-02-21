@@ -6,19 +6,27 @@ import {FunctionsClient} from "chainlink/src/v0.8/functions/v1_0_0/FunctionsClie
 import {FunctionsRequest} from "chainlink/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
 
 abstract contract AsideChainlink is AsideBase, FunctionsClient {
+    using FunctionsRequest for FunctionsRequest.Request;
+
     error InvalidDonId();
     error InvalidSubscriptionId();
     error InvalidCallbackGasLimit();
     error InvalidSource();
+    error InvalidTokenId();
+    error InvalidRequestId(bytes32 requestId);
     error InvalidUnlockRequest(uint256 tokenId, bytes32 requestId);
     error InvalidUnlockCallback(bytes err);
 
-    bytes32 internal _donId;
-    uint64 internal _subscriptionId;
-    uint32 internal _callbackGasLimit;
+    bytes32 private _donId;
+    uint64 private _subscriptionId;
+    uint32 private _callbackGasLimit;
     string internal _source;
+    mapping(bytes32 => uint256) private _tokenIds; // requestId => tokenId
 
-    mapping(bytes32 => uint256) internal _tokenIds; // requestId => tokenId
+    modifier isValidTokenId(uint256 tokenId) {
+        if (tokenId == uint256(0)) revert InvalidTokenId();
+        _;
+    }
 
     /**
      * @notice Creates a new AsideChainlink contract.
@@ -128,34 +136,47 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
 
     /**
      * @notice Returns the tokenId associated to the request `requestId`.
+     * @dev `requestId` must exist.
      * @param requestId The id of the request to get the tokenId associated to.
      * @return The tokenId associated to the request `requestId`.
      */
     function tokenIdOf(bytes32 requestId) public view returns (uint256) {
-        return _tokenIds[requestId];
+        return _tokenIdOf(requestId);
     }
     // #endregion
 
-    // #region internal functions
-    function _setDonId(bytes32 donId_) internal {
+    // #region internal / private functions
+    function _requestUnlock(uint256 tokenId, FunctionsRequest.Request memory req) internal {
+        bytes32 requestId = _sendRequest(req.encodeCBOR(), _subscriptionId, _callbackGasLimit, _donId);
+        _tokenIds[requestId] = tokenId;
+    }
+
+    function _tokenIdOf(bytes32 requestId) internal view returns (uint256) {
+        uint256 tokenId = _tokenIds[requestId];
+        if (tokenId == uint256(0)) revert InvalidRequestId(requestId);
+
+        return tokenId;
+    }
+
+    function _setDonId(bytes32 donId_) private {
         if (donId_ == bytes32(0)) revert InvalidDonId();
 
         _donId = donId_;
     }
 
-    function _setSubscriptionId(uint64 subscriptionId_) internal {
+    function _setSubscriptionId(uint64 subscriptionId_) private {
         if (subscriptionId_ == uint64(0)) revert InvalidSubscriptionId();
 
         _subscriptionId = subscriptionId_;
     }
 
-    function _setCallbackGasLimit(uint32 callbackGasLimit_) internal {
+    function _setCallbackGasLimit(uint32 callbackGasLimit_) private {
         if (callbackGasLimit_ == uint32(0)) revert InvalidCallbackGasLimit();
 
         _callbackGasLimit = callbackGasLimit_;
     }
 
-    function _setSource(string memory source_) internal {
+    function _setSource(string memory source_) private {
         if (bytes(source_).length == 0) revert InvalidSource();
 
         _source = source_;

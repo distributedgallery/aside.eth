@@ -6,8 +6,6 @@ import {AsideBase, AsideBaseTestHelper, IAccessControl} from "../AsideBase/Aside
 import {AsideChainlink} from "../../../src/AsideChainlink.sol";
 
 abstract contract AsideChainlinkTestHelper is AsideBaseTestHelper {
-    event RequestReceived(uint64 subscriptionId, bytes data, uint16 dataVersion, uint32 callbackGasLimit, bytes32 donId);
-
     AsideChainlink public chainlinkToken;
     AsideChainlinkRouter public router;
     bytes32 public requestId = bytes32(uint256(0x01));

@@ -14,10 +14,6 @@ contract Aside0x01 is AsideChainlink {
 
     mapping(uint256 => uint256) private _sentiments; // tokenId => sentiment
 
-    uint32 public constant CALLBACK_GAS_LIMIT = 100_000;
-    string public constant SOURCE =
-        "const response = await Functions.makeHttpRequest({url:'https://aside-js.vercel.app/api/aisentiment', method: 'GET'});if (response.error) {throw Error('Request failed');}return Functions.encodeUint256(response.data.sentiment.toFixed(2)*100);";
-
     /**
      * @notice Creates a new Aside0x01 contract.
      * @param admin_ The address to set as the DEFAULT_ADMIN of this contract.
@@ -52,7 +48,11 @@ contract Aside0x01 is AsideChainlink {
      * @param sentiment The AI sentiment to associate to token `tokenId`.
      * @param uri The token URI to associate to token `tokenId`.
      */
-    function mint(address to, uint256 tokenId, uint256 sentiment, string memory uri) public onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 tokenId, uint256 sentiment, string memory uri)
+        external
+        isValidTokenId(tokenId)
+        onlyRole(MINTER_ROLE)
+    {
         if (sentiment > SENTIMENT_UNIT) revert InvalidSentiment();
         // Check token >=1 to make sure there are no mismatchs in requestId => tokenId mapping ?
         _sentiments[tokenId] = sentiment;
@@ -83,14 +83,10 @@ contract Aside0x01 is AsideChainlink {
      * #`tokenId`'s associated sentiment.
      * @param tokenId The id of the token to unlock.
      */
-    function requestUnlock(uint256 tokenId) external {
-        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
-        if (_isUnlocked(tokenId)) revert TokenAlreadyUnlocked(tokenId);
-
+    function requestUnlock(uint256 tokenId) external isLocked(tokenId) {
         FunctionsRequest.Request memory req;
         req.initializeRequestForInlineJavaScript(_source);
-        bytes32 requestId = _sendRequest(req.encodeCBOR(), _subscriptionId, _callbackGasLimit, _donId);
-        _tokenIds[requestId] = tokenId;
+        _requestUnlock(tokenId, req);
     }
 
     /**
@@ -104,7 +100,7 @@ contract Aside0x01 is AsideChainlink {
         // check if requests match
         if (err.length > 0) revert InvalidUnlockCallback(err); // check if there is an error in the
             // request
-        uint256 tokenId = _tokenIds[requestId];
+        uint256 tokenId = _tokenIdOf(requestId);
         if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
         if (_isUnlocked(tokenId)) revert TokenAlreadyUnlocked(tokenId);
         uint256 sentiment = uint256(bytes32(response));
@@ -113,8 +109,7 @@ contract Aside0x01 is AsideChainlink {
             revert InvalidUnlockRequest(tokenId, requestId);
         } // check if sentiment is in the expected range
 
-        _unlocks[tokenId] = true;
-        emit Unlock(tokenId);
+        _unlock(tokenId);
     }
     // #endregion
 

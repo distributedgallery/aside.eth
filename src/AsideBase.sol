@@ -16,8 +16,14 @@ abstract contract AsideBase is ERC721, ERC721URIStorage, ERC721Burnable, AccessC
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     uint256 public immutable TIMELOCK_DEADLINE;
 
-    bool internal _eUnlocked = false; // emergency unlock
-    mapping(uint256 => bool) internal _unlocks; // tokenId => isUnlocked
+    bool private _eUnlocked = false; // emergency unlock
+    mapping(uint256 => bool) private _unlocks; // tokenId => isUnlocked
+
+    modifier isLocked(uint256 tokenId) {
+        _requireOwned(tokenId);
+        if (_isUnlocked(tokenId)) revert TokenAlreadyUnlocked(tokenId);
+        _;
+    }
 
     /**
      * @notice Creates a new AsideBase contract.
@@ -95,6 +101,12 @@ abstract contract AsideBase is ERC721, ERC721URIStorage, ERC721Burnable, AccessC
 
     function _isUnlocked(uint256 tokenId) internal view returns (bool) {
         return _unlocks[tokenId] || _areAllUnlocked();
+    }
+
+    function _unlock(uint256 tokenId) internal {
+        _unlocks[tokenId] = true;
+
+        emit Unlock(tokenId);
     }
 
     function _update(address to, uint256 tokenId, address auth) internal override(ERC721) returns (address) {
