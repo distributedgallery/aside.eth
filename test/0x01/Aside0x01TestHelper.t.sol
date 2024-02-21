@@ -6,7 +6,8 @@ import {
     AsideBaseTestHelper,
     AsideChainlink,
     AsideChainlinkTestHelper,
-    AsideChainlinkRouter
+    AsideChainlinkRouter,
+    IERC721Errors
 } from "../helpers/AsideChainlink/AsideChainlinkTestHelper.t.sol";
 import {Aside0x01} from "../../src/Aside0x01.sol";
 

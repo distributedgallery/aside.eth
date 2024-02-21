@@ -81,7 +81,7 @@ contract Aside0x01 is AsideChainlink {
         uint256 tokenId = _tokenIdOf(requestId);
         if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
         if (_isUnlocked(tokenId)) revert TokenAlreadyUnlocked(tokenId);
-        uint256 sentiment = uint256(bytes32(response));
+        uint256 sentiment = uint8(uint256(bytes32(response)));
         uint256 expectedSentiment = _sentiments[tokenId];
         if (sentiment < expectedSentiment || sentiment >= expectedSentiment + SENTIMENT_INTERVAL) {
             revert InvalidUnlockRequest(tokenId, requestId);
@@ -97,7 +97,7 @@ contract Aside0x01 is AsideChainlink {
      * @dev `tokenId` must exist.
      * @return The sentiment associated to token `tokenId`.
      */
-    function sentimentOf(uint256 tokenId) public view returns (uint256) {
+    function sentimentOf(uint256 tokenId) public view returns (uint8) {
         _requireOwned(tokenId);
 
         return _sentiments[tokenId];
