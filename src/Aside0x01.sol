@@ -83,9 +83,9 @@ contract Aside0x01 is AsideChainlink {
      * #`tokenId`'s associated sentiment.
      * @param tokenId The id of the token to unlock.
      */
-    function requestUnlock(uint256 tokenId) external isLocked(tokenId) {
+    function requestUnlock(uint256 tokenId) external override isLocked(tokenId) {
         FunctionsRequest.Request memory req;
-        req.initializeRequestForInlineJavaScript(_source);
+        req.initializeRequestForInlineJavaScript(source());
         _requestUnlock(tokenId, req);
     }
 

@@ -20,7 +20,7 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
     bytes32 private _donId;
     uint64 private _subscriptionId;
     uint32 private _callbackGasLimit;
-    string internal _source;
+    string private _source;
     mapping(bytes32 => uint256) private _tokenIds; // requestId => tokenId
 
     modifier isValidTokenId(uint256 tokenId) {
@@ -58,6 +58,8 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
         _setCallbackGasLimit(callbackGasLimit_);
         _setSource(source_);
     }
+
+    function requestUnlock(uint256 tokenId) external virtual;
 
     // #region admin-only functions
     /**
@@ -146,16 +148,16 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
     // #endregion
 
     // #region internal / private functions
-    function _requestUnlock(uint256 tokenId, FunctionsRequest.Request memory req) internal {
-        bytes32 requestId = _sendRequest(req.encodeCBOR(), _subscriptionId, _callbackGasLimit, _donId);
-        _tokenIds[requestId] = tokenId;
-    }
-
     function _tokenIdOf(bytes32 requestId) internal view returns (uint256) {
         uint256 tokenId = _tokenIds[requestId];
         if (tokenId == uint256(0)) revert InvalidRequestId(requestId);
 
         return tokenId;
+    }
+
+    function _requestUnlock(uint256 tokenId, FunctionsRequest.Request memory req) internal {
+        bytes32 requestId = _sendRequest(req.encodeCBOR(), _subscriptionId, _callbackGasLimit, _donId);
+        _tokenIds[requestId] = tokenId;
     }
 
     function _setDonId(bytes32 donId_) private {
