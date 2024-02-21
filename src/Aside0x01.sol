@@ -3,16 +3,15 @@ pragma solidity ^0.8.20;
 
 import {AsideChainlink, FunctionsRequest} from "./AsideChainlink.sol";
 
-/// @custom:security-contact contact@distributedgallery.art
 contract Aside0x01 is AsideChainlink {
     using FunctionsRequest for FunctionsRequest.Request;
 
     error InvalidSentiment();
 
-    uint32 public constant SENTIMENT_UNIT = 100;
-    uint32 public constant SENTIMENT_INTERVAL = 10;
+    uint8 public constant SENTIMENT_UNIT = 100;
+    uint8 public constant SENTIMENT_INTERVAL = 10;
 
-    mapping(uint256 => uint256) private _sentiments; // tokenId => sentiment
+    mapping(uint256 => uint8) private _sentiments; // tokenId => sentiment
 
     /**
      * @notice Creates a new Aside0x01 contract.
@@ -38,36 +37,39 @@ contract Aside0x01 is AsideChainlink {
 
     /**
      * @notice Mints `tokenId`, transfers it to `to` and checks for `to` acceptance.
-     * @dev `sentiment` must be in the range of 0 to SENTIMENT_UNIT.
+     * @dev `to` must not be the zero address.
      * @dev `tokenId` must not exist.
-     * @dev If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received},
-     * which is called upon a safe transfer.
+     * @dev `tokenId` must be >= 1.
+     * @dev `sentiment` must be in the [0, SENTIMENT_UNIT] range.
      * @dev Emits a {Transfer} event.
      * @param to The address to receive the token to be minted.
      * @param tokenId The id of the token to be minted.
-     * @param sentiment The AI sentiment to associate to token `tokenId`.
-     * @param uri The token URI to associate to token `tokenId`.
+     * @param payload The payload to be used to mint the token. This payload must be a string of the form "SSSURI", where SSS is the
+     * sentiment of the token and URI is the URI of the token.
      */
-    function mint(address to, uint256 tokenId, uint256 sentiment, string memory uri)
-        external
-        isValidTokenId(tokenId)
-        onlyRole(MINTER_ROLE)
-    {
-        if (sentiment > SENTIMENT_UNIT) revert InvalidSentiment();
-        // Check token >=1 to make sure there are no mismatchs in requestId => tokenId mapping ?
+    // function mint(address to, uint256 tokenId, uint256 sentiment, string memory uri)
+    function mint(address to, uint256 tokenId, string calldata payload) external isValidTokenId(tokenId) onlyRole(MINTER_ROLE) {
+        uint8 sentiment = _sentimentFromString(payload[0:3]);
+        string memory uri = payload[3:bytes(payload).length];
+
         _sentiments[tokenId] = sentiment;
+
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
     }
 
-    function stringToUint(string memory s) public pure returns (uint256) {
-        bytes memory b = bytes(s);
-        uint256 result = 0;
-        for (uint256 i = 0; i < b.length; i++) {
-            uint256 c = uint256(uint8(b[i]));
-            if (c >= 48 && c <= 57) result = result * 10 + (c - 48);
+    function _sentimentFromString(string memory _sentiment) private pure returns (uint8) {
+        bytes memory b = bytes(_sentiment);
+        uint8 sentiment = 0;
+
+        for (uint8 i = 0; i < 3; i++) {
+            uint8 c = uint8(b[i]);
+            if (c >= 48 && c <= 57) sentiment = sentiment * 10 + (c - 48);
+            else revert InvalidSentiment();
         }
-        return result;
+        if (sentiment > SENTIMENT_UNIT) revert InvalidSentiment();
+
+        return sentiment;
     }
 
     //   function trim(string calldata str, uint start, uint end) external pure returns(string memory)

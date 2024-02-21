@@ -16,7 +16,8 @@ abstract contract Aside0x01TestHelper is AsideChainlinkTestHelper {
 
     function _mint() internal virtual override(AsideBaseTestHelper) {
         vm.prank(minter);
-        Aside0x01(address(token)).mint(owner, tokenId, sentiment, tokenURI);
+        // Aside0x01(address(token)).mint(owner, tokenId, sentiment, tokenURI);
+        Aside0x01(token).mint(owner, tokenId, string.concat("060", tokenURI));
     }
 
     function setUp() public {
