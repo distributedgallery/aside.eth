@@ -10,7 +10,7 @@ abstract contract SetDonId is AsideChainlinkTestHelper {
         assertEq(chainlinkToken.donId(), bytes32(uint256(1)));
     }
 
-    function test_RevertWhen_setDonIdFromUnauthorized() public {
+    function test_RevertWhen_setDonId_FromUnauthorized() public {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector, address(this), chainlinkToken.DEFAULT_ADMIN_ROLE()
@@ -19,7 +19,7 @@ abstract contract SetDonId is AsideChainlinkTestHelper {
         chainlinkToken.setDonId(bytes32(uint256(1)));
     }
 
-    function test_RevertWhen_setDonIdToInvalidId() public {
+    function test_RevertWhen_setDonId_ToInvalidDonId() public {
         vm.prank(admin);
         vm.expectRevert(abi.encodeWithSelector(AsideChainlink.InvalidDonId.selector));
         chainlinkToken.setDonId(bytes32(uint256(0)));

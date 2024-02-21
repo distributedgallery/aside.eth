@@ -19,11 +19,12 @@ abstract contract AsideBaseTestHelper is Test {
     address public constant operator = address(0x02);
     address public constant approved = address(0x03);
     address public constant recipient = address(0x04);
+    uint256 public constant timelock = 365 days;
     uint256 public constant tokenId = 1;
     string public constant tokenURI = "ipfs://ipfs/Qm/1";
 
     modifier unlock() {
-        _unlock();
+        _reachTimelockDeadline();
         _;
     }
 
@@ -32,8 +33,8 @@ abstract contract AsideBaseTestHelper is Test {
         _;
     }
 
-    function _unlock() internal {
-        // vm.warp(token.TIMELOCK_DEADLINE());
+    function _reachTimelockDeadline() internal {
+        vm.warp(baseToken.TIMELOCK_DEADLINE());
     }
 
     function _mint() internal virtual {}

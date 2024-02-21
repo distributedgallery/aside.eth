@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {AsideChainlinkRouter} from "./AsideChainlinkRouter.t.sol";
-import {AsideBaseTestHelper, IAccessControl} from "../AsideBase/AsideBaseTestHelper.t.sol";
+import {AsideBase, AsideBaseTestHelper, IAccessControl} from "../AsideBase/AsideBaseTestHelper.t.sol";
 import {AsideChainlink} from "../../../src/AsideChainlink.sol";
 
 abstract contract AsideChainlinkTestHelper is AsideBaseTestHelper {

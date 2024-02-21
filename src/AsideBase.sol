@@ -2,9 +2,9 @@
 pragma solidity ^0.8.20;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
-import {ERC721Burnable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import {ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import {ERC721Burnable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
 abstract contract AsideBase is ERC721, ERC721URIStorage, ERC721Burnable, AccessControl {
     error TokenLocked(uint256 tokenId);
@@ -17,7 +17,6 @@ abstract contract AsideBase is ERC721, ERC721URIStorage, ERC721Burnable, AccessC
     uint256 public immutable TIMELOCK_DEADLINE;
 
     bool internal _eUnlocked = false; // emergency unlock
-
     mapping(uint256 => bool) internal _unlocks; // tokenId => isUnlocked
 
     /**
@@ -33,38 +32,6 @@ abstract contract AsideBase is ERC721, ERC721URIStorage, ERC721Burnable, AccessC
         _grantRole(MINTER_ROLE, minter_);
         TIMELOCK_DEADLINE = block.timestamp + timelock_;
     }
-
-    // #region getters
-    /**
-     * @notice Checks whether all the tokens have been unlocked at once by emergency or not.
-     * @return A boolean indicating whether all the tokens have been unlocked at once by emergency or
-     * not.
-     */
-    function isEmergencyUnlocked() public view returns (bool) {
-        return _eUnlocked;
-    }
-
-    /**
-     * @notice Checks whether all the tokens are unlocked, either because of an emergency unlock or
-     * because the lock deadline has been reached.
-     * @return A boolean indicating whether all the tokens are unlocked or not.
-     */
-    function areAllUnlocked() public view returns (bool) {
-        return _areAllUnlocked();
-    }
-
-    /**
-     * @notice Checks whether token `tokenId` is unlocked or not.
-     * @dev `tokenId` must exist.
-     * @param tokenId The id of the token to check whether it is unlocked or not.
-     * @return A boolean indicating whether token `tokenId` is unlocked or not.
-     */
-    function isUnlocked(uint256 tokenId) public view returns (bool) {
-        _requireOwned(tokenId);
-
-        return _isUnlocked(tokenId);
-    }
-    // #endregion
 
     // #region admin-only functions
     /**
@@ -89,7 +56,39 @@ abstract contract AsideBase is ERC721, ERC721URIStorage, ERC721Burnable, AccessC
     }
     // #endregion
 
-    // #region private / internal functionsπ
+    // #region getter functions
+    /**
+     * @notice Checks whether all the tokens have been unlocked at once in an emergency or not.
+     * @return A boolean indicating whether all the tokens have been unlocked at once in an emergency or
+     * not.
+     */
+    function isEUnlocked() public view returns (bool) {
+        return _eUnlocked;
+    }
+
+    /**
+     * @notice Checks whether all the tokens are unlocked, either because of an emergency unlock or
+     * because the timelock deadline has been reached.
+     * @return A boolean indicating whether all the tokens are unlocked or not.
+     */
+    function areAllUnlocked() public view returns (bool) {
+        return _areAllUnlocked();
+    }
+
+    /**
+     * @notice Checks whether token `tokenId` is unlocked or not.
+     * @dev `tokenId` must exist.
+     * @param tokenId The id of the token to check whether it is unlocked or not.
+     * @return A boolean indicating whether token `tokenId` is unlocked or not.
+     */
+    function isUnlocked(uint256 tokenId) public view returns (bool) {
+        _requireOwned(tokenId);
+
+        return _isUnlocked(tokenId);
+    }
+    // #endregion
+
+    // #region internal functions
     function _areAllUnlocked() internal view returns (bool) {
         return block.timestamp >= TIMELOCK_DEADLINE || _eUnlocked;
     }

@@ -11,9 +11,8 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
     error InvalidCallbackGasLimit();
     error InvalidSource();
     error InvalidUnlockRequest(uint256 tokenId, bytes32 requestId);
-    error InvalidChainlinkRequest(bytes err);
+    error InvalidUnlockCallback(bytes err);
 
-    address internal _router;
     bytes32 internal _donId;
     uint64 internal _subscriptionId;
     uint32 internal _callbackGasLimit;
@@ -86,7 +85,7 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
     }
     // #endregion
 
-    // #region getters
+    // #region getter functions
     /**
      * @notice Returns the Chainlink Functions router address.
      * @return The address of the Chainlink Functions router.

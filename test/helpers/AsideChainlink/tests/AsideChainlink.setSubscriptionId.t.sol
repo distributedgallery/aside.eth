@@ -10,7 +10,7 @@ abstract contract SetSubscriptionId is AsideChainlinkTestHelper {
         assertEq(chainlinkToken.subscriptionId(), subscriptionId + 1);
     }
 
-    function test_RevertWhen_setSubscriptionIdFromUnauthorized() public {
+    function test_RevertWhen_setSubscriptionId_FromUnauthorized() public {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector, address(this), chainlinkToken.DEFAULT_ADMIN_ROLE()
@@ -19,7 +19,7 @@ abstract contract SetSubscriptionId is AsideChainlinkTestHelper {
         chainlinkToken.setSubscriptionId(subscriptionId + 1);
     }
 
-    function test_RevertWhen_setSubscriptionIdToInvalidId() public {
+    function test_RevertWhen_setSubscriptionId_ToInvalidSubscriptionId() public {
         vm.prank(admin);
         vm.expectRevert(abi.encodeWithSelector(AsideChainlink.InvalidSubscriptionId.selector));
         chainlinkToken.setSubscriptionId(uint64(0));

@@ -10,7 +10,7 @@ abstract contract SetSource is AsideChainlinkTestHelper {
         assertEq(chainlinkToken.source(), "thisisadamnedsource");
     }
 
-    function test_RevertWhen_setSourceFromUnauthorized() public {
+    function test_RevertWhen_setSource_FromUnauthorized() public {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector, address(this), chainlinkToken.DEFAULT_ADMIN_ROLE()
@@ -19,7 +19,7 @@ abstract contract SetSource is AsideChainlinkTestHelper {
         chainlinkToken.setSource("thisisadamnedsource");
     }
 
-    function test_RevertWhen_setSourceToInvalid() public {
+    function test_RevertWhen_setSource_ToInvalidSource() public {
         vm.prank(admin);
         vm.expectRevert(abi.encodeWithSelector(AsideChainlink.InvalidSource.selector));
         chainlinkToken.setSource("");

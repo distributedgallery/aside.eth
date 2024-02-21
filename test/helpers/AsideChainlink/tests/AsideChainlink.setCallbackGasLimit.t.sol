@@ -10,7 +10,7 @@ abstract contract SetCallbackGasLimit is AsideChainlinkTestHelper {
         assertEq(chainlinkToken.callbackGasLimit(), callbackGasLimit + 1);
     }
 
-    function test_RevertWhen_setCallbackGasLimitFromUnauthorized() public {
+    function test_RevertWhen_setCallbackGasLimit_FromUnauthorized() public {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector, address(this), chainlinkToken.DEFAULT_ADMIN_ROLE()
@@ -19,7 +19,7 @@ abstract contract SetCallbackGasLimit is AsideChainlinkTestHelper {
         chainlinkToken.setCallbackGasLimit(callbackGasLimit + 1);
     }
 
-    function test_RevertWhen_setCallbackGasLimitToInvalidId() public {
+    function test_RevertWhen_setCallbackGasLimit_ToInvalidCallbackGasLimit() public {
         vm.prank(admin);
         vm.expectRevert(abi.encodeWithSelector(AsideChainlink.InvalidCallbackGasLimit.selector));
         chainlinkToken.setCallbackGasLimit(uint32(0));

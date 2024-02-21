@@ -49,8 +49,15 @@ contract AsideChainlinkRouter is IFunctionsRouter {
         return (FunctionsResponse.FulfillResult.FULFILLED, 0);
     }
 
-    function fulfillRequest(IFunctionsClient client, bytes32 requestId, bytes memory response, bytes memory err) external {
-        try client.handleOracleFulfillment(requestId, response, err) {
+    function fulfillRequest(IFunctionsClient, /*client*/ bytes32, /*requestId*/ bytes memory, /*response*/ bytes memory /*err*/ )
+        external
+        pure
+    {
+        return;
+    }
+
+    function fulfillRequest(IFunctionsClient client, bytes memory response, bytes memory err) external {
+        try client.handleOracleFulfillment(REQUEST_ID, response, err) {
             // success
         } catch Error(string memory reason) {
             revert(reason);

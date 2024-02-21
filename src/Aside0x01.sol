@@ -17,7 +17,6 @@ contract Aside0x01 is AsideChainlink {
 
     mapping(uint256 => uint256) private _sentiments; // tokenId => sentiment
 
-    uint256 public TIMELOCK = 700 days;
     uint32 public constant CALLBACK_GAS_LIMIT = 100_000;
     string public constant SOURCE =
         "const response = await Functions.makeHttpRequest({url:'https://aside-js.vercel.app/api/aisentiment', method: 'GET'});if (response.error) {throw Error('Request failed');}return Functions.encodeUint256(response.data.sentiment.toFixed(2)*100);";
@@ -26,6 +25,7 @@ contract Aside0x01 is AsideChainlink {
      * @notice Creates a new Aside0x01 contract.
      * @param admin_ The address to set as the DEFAULT_ADMIN of this contract.
      * @param minter_ The address to set as the MINTER of this contract.
+     * @param timelock_ The duration of the timelock upon which all tokens are automatically unlocked.
      * @param router_ The address of the Chainlink Functions router.
      * @param donId_ The id of the Chainlink Functions DON.
      * @param subscriptionId_ The id of the Chainlink Functions subscription.
@@ -35,12 +35,13 @@ contract Aside0x01 is AsideChainlink {
     constructor(
         address admin_,
         address minter_,
+        uint256 timelock_,
         address router_,
         bytes32 donId_,
         uint64 subscriptionId_,
         uint32 callbackGasLimit_,
         string memory source_
-    ) AsideChainlink("Aside0x01", "ASD", admin_, minter_, TIMELOCK, router_, donId_, subscriptionId_, callbackGasLimit_, source_) {}
+    ) AsideChainlink("Aside0x01", "ASD0x01", admin_, minter_, timelock_, router_, donId_, subscriptionId_, callbackGasLimit_, source_) {}
 
     /**
      * @notice Mints `tokenId`, transfers it to `to` and checks for `to` acceptance.
@@ -104,7 +105,7 @@ contract Aside0x01 is AsideChainlink {
     function fulfillRequest(bytes32 requestId, bytes memory response, bytes memory err) internal override {
         // if (requestId != _currentRequestId) revert InvalidRequestId(_currentRequestId, requestId); //
         // check if requests match
-        if (err.length > 0) revert InvalidChainlinkRequest(err); // check if there is an error in the
+        if (err.length > 0) revert InvalidUnlockCallback(err); // check if there is an error in the
             // request
         uint256 tokenId = _tokenIds[requestId];
         if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
