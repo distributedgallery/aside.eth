@@ -130,14 +130,14 @@ abstract contract SafeTransferFrom is AsideBaseTestHelper {
     // #region ERC721RecipientWithWrongReturnData
     function test_RevertWhen_safeTransferFrom_ToERC721RecipientWithWrongReturnData_WithoutData() public mint unlock {
         address to = address(new WrongReturnDataERC721Recipient());
-        vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidReceiver.selector, address(to)));
+        vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidReceiver.selector, to));
         vm.prank(owner);
         baseToken.safeTransferFrom(owner, to, tokenId);
     }
 
     function test_RevertWhen_safeTransferFrom_ToERC721RecipientWithWrongReturnData_WithData() public mint unlock {
         address to = address(new WrongReturnDataERC721Recipient());
-        vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidReceiver.selector, address(to)));
+        vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidReceiver.selector, to));
         vm.prank(owner);
         baseToken.safeTransferFrom(owner, to, tokenId, "thisisdata");
     }

@@ -9,6 +9,10 @@ contract Aside0x01ChainlinkTest is Aside0x01TestHelper, AsideChainlinkTest {
         super._mint();
     }
 
+    function _mint(address to) internal override(Aside0x01TestHelper, AsideBaseTestHelper) {
+        super._mint(to);
+    }
+
     function test_tokenIdOf() public mint {
         token.requestUnlock(tokenId);
         assertEq(token.tokenIdOf(router.REQUEST_ID()), tokenId);

@@ -9,6 +9,7 @@ import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 abstract contract AsideBase is ERC721, ERC721URIStorage, ERC721Burnable, AccessControl {
     error TokenLocked(uint256 tokenId);
     error TokenAlreadyUnlocked(uint256 tokenId);
+    error InvalidPayload(string payload);
 
     event Unlock(uint256 indexed tokenId);
     event EmergencyUnlock(bool unlocked);
@@ -38,6 +39,14 @@ abstract contract AsideBase is ERC721, ERC721URIStorage, ERC721Burnable, AccessC
         _grantRole(MINTER_ROLE, minter_);
         TIMELOCK_DEADLINE = block.timestamp + timelock_;
     }
+
+    /**
+     * @notice Mints `tokenId`, transfers it to `to` and checks for `to` acceptance.
+     * @param to The address to receive the token to be minted.
+     * @param tokenId The id of the token to be minted.
+     * @param payload The payload to be used for the token to be minted.
+     */
+    function mint(address to, uint256 tokenId, string calldata payload) external virtual;
 
     // #region admin-only functions
     /**

@@ -9,6 +9,10 @@ contract Aside0x01BaseTest is Aside0x01TestHelper, AsideBaseTest {
         super._mint();
     }
 
+    function _mint(address to) internal override(Aside0x01TestHelper, AsideBaseTestHelper) {
+        super._mint(to);
+    }
+
     function test_isUnlocked_WhenRegularUnlockHasBeenTriggered() public mint {
         token.requestUnlock(tokenId);
         router.fulfillRequest(token, abi.encodePacked(sentiment), "");

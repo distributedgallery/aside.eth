@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {AsideChainlink, FunctionsRequest} from "./AsideChainlink.sol";
+import {AsideBase, AsideChainlink, FunctionsRequest} from "./AsideChainlink.sol";
 
 contract Aside0x01 is AsideChainlink {
     using FunctionsRequest for FunctionsRequest.Request;
@@ -36,46 +36,22 @@ contract Aside0x01 is AsideChainlink {
     ) AsideChainlink("Aside0x01", "ASD0x01", admin_, minter_, timelock_, router_, donId_, subscriptionId_, callbackGasLimit_, source_) {}
 
     /**
-     * @notice Mints `tokenId`, transfers it to `to` and checks for `to` acceptance.
-     * @dev `to` must not be the zero address.
-     * @dev `tokenId` must not exist.
+     * @inheritdoc AsideBase
      * @dev `tokenId` must be >= 1.
-     * @dev `sentiment` must be in the [0, SENTIMENT_UNIT] range.
-     * @dev Emits a {Transfer} event.
-     * @param to The address to receive the token to be minted.
-     * @param tokenId The id of the token to be minted.
-     * @param payload The payload to be used to mint the token. This payload must be a string of the form "SSSURI", where SSS is the
-     * sentiment of the token and URI is the URI of the token.
+     * @dev The payload must be a string of the form "SSSURI", where SSS is a 3 digits string defining the sentiment to associate to token
+     * `tokenId` and URI is the URI to associate to token `tokenId`.
+     * @dev The sentiment must be in the [0, 100] range.
      */
-    // function mint(address to, uint256 tokenId, uint256 sentiment, string memory uri)
-    function mint(address to, uint256 tokenId, string calldata payload) external isValidTokenId(tokenId) onlyRole(MINTER_ROLE) {
-        uint8 sentiment = _sentimentFromString(payload[0:3]);
+    function mint(address to, uint256 tokenId, string calldata payload) external override isValidTokenId(tokenId) onlyRole(MINTER_ROLE) {
+        if (bytes(payload).length < 4) revert InvalidPayload(payload);
+
+        uint8 sentiment = _castSentiment(payload[0:3]);
         string memory uri = payload[3:bytes(payload).length];
 
         _sentiments[tokenId] = sentiment;
-
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
     }
-
-    function _sentimentFromString(string memory _sentiment) private pure returns (uint8) {
-        bytes memory b = bytes(_sentiment);
-        uint8 sentiment = 0;
-
-        for (uint8 i = 0; i < 3; i++) {
-            uint8 c = uint8(b[i]);
-            if (c >= 48 && c <= 57) sentiment = sentiment * 10 + (c - 48);
-            else revert InvalidSentiment();
-        }
-        if (sentiment > SENTIMENT_UNIT) revert InvalidSentiment();
-
-        return sentiment;
-    }
-
-    //   function trim(string calldata str, uint start, uint end) external pure returns(string memory)
-    // {
-    //     return str[start:end];
-    // }
 
     /**
      * @notice Requests the unlock of token #`tokenId`.
@@ -125,6 +101,23 @@ contract Aside0x01 is AsideChainlink {
         _requireOwned(tokenId);
 
         return _sentiments[tokenId];
+    }
+    // #endregion
+
+    // #region private functions
+    function _castSentiment(string memory _sentiment) private pure returns (uint8) {
+        bytes memory b = bytes(_sentiment);
+        uint8 sentiment = 0;
+
+        for (uint8 i = 0; i < 3; i++) {
+            uint8 c = uint8(b[i]);
+            if (c >= 48 && c <= 57) sentiment = sentiment * 10 + (c - 48);
+            else revert InvalidSentiment();
+        }
+
+        if (sentiment > SENTIMENT_UNIT) revert InvalidSentiment();
+
+        return sentiment;
     }
     // #endregion
 }

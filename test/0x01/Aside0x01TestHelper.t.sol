@@ -13,11 +13,16 @@ import {Aside0x01} from "../../src/Aside0x01.sol";
 abstract contract Aside0x01TestHelper is AsideChainlinkTestHelper {
     Aside0x01 public token;
     uint256 public sentiment = 60;
+    string public payload = string.concat("060", tokenURI);
 
     function _mint() internal virtual override(AsideBaseTestHelper) {
         vm.prank(minter);
-        // Aside0x01(address(token)).mint(owner, tokenId, sentiment, tokenURI);
-        Aside0x01(token).mint(owner, tokenId, string.concat("060", tokenURI));
+        token.mint(owner, tokenId, payload);
+    }
+
+    function _mint(address to) internal virtual override(AsideBaseTestHelper) {
+        vm.prank(minter);
+        token.mint(to, tokenId, payload);
     }
 
     function setUp() public {

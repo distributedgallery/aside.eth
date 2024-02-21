@@ -38,4 +38,6 @@ abstract contract AsideBaseTestHelper is Test {
     }
 
     function _mint() internal virtual {}
+
+    function _mint(address to) internal virtual {}
 }
