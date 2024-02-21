@@ -5,5 +5,7 @@ import {Approve} from "./AsideBase.ERC721.approve.t.sol";
 import {BalanceOf} from "./AsideBase.ERC721.balanceOf.t.sol";
 import {OwnerOf} from "./AsideBase.ERC721.ownerOf.t.sol";
 import {SafeTransferFrom} from "./AsideBase.ERC721.safeTransferFrom.t.sol";
+import {SetApprovalForAll} from "./AsideBase.ERC721.setApprovalForAll.t.sol";
+import {TokenURI} from "./AsideBase.ERC721.tokenURI.t.sol";
 
-abstract contract AsideBaseERC721Test is Approve, BalanceOf, OwnerOf, SafeTransferFrom {}
+abstract contract AsideBaseERC721Test is Approve, BalanceOf, OwnerOf, SafeTransferFrom, SetApprovalForAll, TokenURI {}
