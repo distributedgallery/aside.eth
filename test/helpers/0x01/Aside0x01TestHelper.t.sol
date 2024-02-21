@@ -1,40 +1,38 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.20;
 
 import {Aside0x01} from "../../../src/Aside0x01.sol";
+import {AsideBase} from "../AsideBase/AsideBaseTestHelper.t.sol";
 import {
-  AsideChainlinkTestHelper,
-  AsideChainlink,
-  AsideChainlinkRouter,
-  IAccessControl
+    AsideBaseTestHelper,
+    AsideChainlinkTestHelper,
+    AsideChainlink,
+    AsideChainlinkRouter,
+    IAccessControl
 } from "../AsideChainlink/AsideChainlinkTestHelper.t.sol";
-import {FunctionsRequest} from
-  "../../../lib/chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
+import {FunctionsRequest} from "../../../lib/chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
 
-contract Aside0x01TestHelper is AsideChainlinkTestHelper {
-  uint256 public sentiment = 60;
+abstract contract Aside0x01TestHelper is AsideBaseTestHelper, AsideChainlinkTestHelper {
+    uint256 public sentiment = 60;
+    Aside0x01 public token;
 
-  // function token() public override(AsideChainlinkTestHelper) returns (AsideChainlink) {
-  //     return _token;
-  // }
+    // function token() public override(AsideChainlinkTestHelper) returns (AsideChainlink) {
+    //     return _token;
+    // }
 
-  modifier mint() {
-    vm.prank(minter);
-    Aside0x01(address(token)).mint(owner, tokenId, sentiment, tokenURI);
-    _;
-  }
+    function _mint() internal virtual override(AsideBaseTestHelper) {
+        vm.prank(minter);
+        Aside0x01(address(token)).mint(owner, tokenId, sentiment, tokenURI);
+    }
 
-  modifier unlock() {
-    _unlock();
-    _;
-  }
+    // modifier mint() virtual override(AsideChainlinkTestHelper) {
+    //     _;
+    // }
 
-  function setUp() public {
-    router = new AsideChainlinkRouter();
-    token = new Aside0x01(admin, minter, timelock, address(router), donId, subscriptionId);
-  }
-
-  function _unlock() internal {
-    vm.warp(token.TIMELOCK_DEADLINE());
-  }
+    function setUp() public {
+        router = new AsideChainlinkRouter();
+        token = new Aside0x01(admin, minter, address(router), donId, subscriptionId, callbackGasLimit, source);
+        baseToken = AsideBase(token);
+        chainlinkToken = AsideChainlink(token);
+    }
 }
