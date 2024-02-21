@@ -150,16 +150,13 @@ abstract contract SafeTransferFrom is AsideBaseTestHelper {
         baseToken.safeTransferFrom(owner, recipient, tokenId);
     }
 
-    function test_RevertWhen_safeTransferFrom_ForWrongOwner() public mint unlock {
-        vm.prank(owner);
-        baseToken.setApprovalForAll(operator, true);
-
+    function test_RevertWhen_safeTransferFrom_FromWrongOwner() public mint unlock {
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721IncorrectOwner.selector, address(0xDEAD), tokenId, owner));
-        vm.prank(operator);
+        vm.prank(owner);
         baseToken.safeTransferFrom(address(0xDEAD), recipient, tokenId);
     }
 
-    function test_RevertWhen_safeTransferFrom_ForZeroAddress() public mint unlock {
+    function test_RevertWhen_safeTransferFrom_FromZeroAddress() public mint unlock {
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721IncorrectOwner.selector, address(0), tokenId, owner));
         vm.prank(owner);
         baseToken.safeTransferFrom(address(0), recipient, tokenId);

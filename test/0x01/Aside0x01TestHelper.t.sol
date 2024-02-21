@@ -10,7 +10,7 @@ import {
 } from "../helpers/AsideChainlink/AsideChainlinkTestHelper.t.sol";
 import {Aside0x01} from "../../src/Aside0x01.sol";
 
-abstract contract Aside0x01TestHelper is AsideBaseTestHelper, AsideChainlinkTestHelper {
+abstract contract Aside0x01TestHelper is AsideChainlinkTestHelper {
     Aside0x01 public token;
     uint256 public sentiment = 60;
 

@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import {AsideChainlink, FunctionsRequest} from "./AsideChainlink.sol";
 
 /// @custom:security-contact contact@distributedgallery.art
@@ -132,9 +129,5 @@ contract Aside0x01 is AsideChainlink {
 
         return _sentiments[tokenId];
     }
-    // #endregion
-
-    // #region private / internal functions
-
     // #endregion
 }
