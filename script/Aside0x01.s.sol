@@ -18,8 +18,7 @@ contract DeployAside0x01 is Script {
     function run() external {
         vm.startBroadcast();
 
-        Aside0x01 token =
-            new Aside0x01(ADMIN, MINTER, TIMELOCK, SEPOLIA_ROUTER, SEPOLIA_DON_ID, SUBSCRIPTION_ID, CALLBACK_GAS_LIMIT, SOURCE);
+        new Aside0x01(ADMIN, MINTER, TIMELOCK, SEPOLIA_ROUTER, SEPOLIA_DON_ID, SUBSCRIPTION_ID, CALLBACK_GAS_LIMIT, SOURCE);
 
         vm.stopBroadcast();
     }
