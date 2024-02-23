@@ -3,10 +3,9 @@ pragma solidity ^0.8.20;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import {ERC721Burnable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
-abstract contract AsideBase is ERC721, ERC721URIStorage, ERC721Burnable, AccessControl {
+abstract contract AsideBase is ERC721, ERC721URIStorage, AccessControl {
     error TokenLocked(uint256 tokenId);
     error TokenAlreadyUnlocked(uint256 tokenId);
     error InvalidPayload(string payload);
