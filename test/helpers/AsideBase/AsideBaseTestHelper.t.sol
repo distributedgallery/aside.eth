@@ -21,6 +21,7 @@ abstract contract AsideBaseTestHelper is Test {
     address public constant recipient = address(0x04);
     uint256 public constant timelock = 365 days;
     uint256 public constant tokenId = 1;
+    string public constant baseURI = "ipfs://ipfs/Qm/";
     string public constant tokenURI = "ipfs://ipfs/Qm/1";
 
     modifier unlock() {

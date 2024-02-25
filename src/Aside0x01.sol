@@ -15,6 +15,7 @@ contract Aside0x01 is AsideChainlink {
 
     /**
      * @notice Creates a new Aside0x01 contract.
+     * @param baseURI_ The base URI of the token.
      * @param admin_ The address to set as the DEFAULT_ADMIN of this contract.
      * @param minter_ The address to set as the MINTER of this contract.
      * @param timelock_ The duration of the timelock upon which all tokens are automatically unlocked.
@@ -25,6 +26,7 @@ contract Aside0x01 is AsideChainlink {
      * @param source_ The source of the Chainlink Functions call.
      */
     constructor(
+        string memory baseURI_,
         address admin_,
         address minter_,
         uint256 timelock_,
@@ -33,7 +35,21 @@ contract Aside0x01 is AsideChainlink {
         uint64 subscriptionId_,
         uint32 callbackGasLimit_,
         string memory source_
-    ) AsideChainlink("Aside0x01", "ASD0x01", admin_, minter_, timelock_, router_, donId_, subscriptionId_, callbackGasLimit_, source_) {}
+    )
+        AsideChainlink(
+            "Aside0x01",
+            "ASD0x01",
+            baseURI_,
+            admin_,
+            minter_,
+            timelock_,
+            router_,
+            donId_,
+            subscriptionId_,
+            callbackGasLimit_,
+            source_
+        )
+    {}
 
     /**
      * @inheritdoc AsideBase
@@ -46,17 +62,16 @@ contract Aside0x01 is AsideChainlink {
         if (bytes(payload).length < 4) revert InvalidPayload(payload);
 
         uint8 sentiment = _castSentiment(payload[0:3]);
-        string memory uri = payload[3:bytes(payload).length];
+        // string memory uri = payload[3:bytes(payload).length];
 
         _sentiments[tokenId] = sentiment;
         _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
     }
 
     /**
-     * @notice Requests the unlock of token #`tokenId`.
-     * @dev Token #`tokenId` must exist.
-     * @dev Token #`tokenId` must be locked.
+     * @notice Requests the unlock of token `tokenId`.
+     * @dev `tokenId` must exist.
+     * @dev `tokenId` must be locked.
      * @dev The AI sentiment fetched from Chainlink Functions must be in the range of token
      * #`tokenId`'s associated sentiment.
      * @param tokenId The id of the token to unlock.

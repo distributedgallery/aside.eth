@@ -32,6 +32,7 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
      * @notice Creates a new AsideChainlink contract.
      * @param name_ The name of the token.
      * @param symbol_ The symbol of the token.
+     * @param baseURI_ The base URI of the token.
      * @param admin_ The address to set as the DEFAULT_ADMIN of this contract.
      * @param minter_ The address to set as the MINTER of this contract.
      * @param timelock_ The duration of the timelock upon which all tokens are automatically unlocked.
@@ -44,6 +45,7 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
     constructor(
         string memory name_,
         string memory symbol_,
+        string memory baseURI_,
         address admin_,
         address minter_,
         uint256 timelock_,
@@ -52,7 +54,7 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
         uint64 subscriptionId_,
         uint32 callbackGasLimit_,
         string memory source_
-    ) AsideBase(name_, symbol_, admin_, minter_, timelock_) FunctionsClient(router_) {
+    ) AsideBase(name_, symbol_, baseURI_, admin_, minter_, timelock_) FunctionsClient(router_) {
         _setDonId(donId_);
         _setSubscriptionId(subscriptionId_);
         _setCallbackGasLimit(callbackGasLimit_);

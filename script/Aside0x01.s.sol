@@ -12,13 +12,14 @@ contract DeployAside0x01 is Script {
     bytes32 public constant SEPOLIA_DON_ID = 0x66756e2d657468657265756d2d7365706f6c69612d3100000000000000000000;
     uint64 public constant SUBSCRIPTION_ID = uint64(1900);
     uint32 public constant CALLBACK_GAS_LIMIT = 100_000;
+    string public constant BASE_URI = "ipfs://ipfs/Qm/";
     string public constant SOURCE =
         "const response = await Functions.makeHttpRequest({url:'https://aside-distributedgallery.vercel.app/api/aisentiment', method:'GET'});if (response.error) {throw Error('Request failed');}return Functions.encodeUint256(response.data.sentiment);";
 
     function run() external {
         vm.startBroadcast();
 
-        new Aside0x01(ADMIN, MINTER, TIMELOCK, SEPOLIA_ROUTER, SEPOLIA_DON_ID, SUBSCRIPTION_ID, CALLBACK_GAS_LIMIT, SOURCE);
+        new Aside0x01(BASE_URI, ADMIN, MINTER, TIMELOCK, SEPOLIA_ROUTER, SEPOLIA_DON_ID, SUBSCRIPTION_ID, CALLBACK_GAS_LIMIT, SOURCE);
 
         vm.stopBroadcast();
     }

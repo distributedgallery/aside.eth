@@ -28,7 +28,7 @@ abstract contract Aside0x01TestHelper is AsideChainlinkTestHelper {
 
     function setUp() public {
         router = new AsideChainlinkRouter();
-        token = new Aside0x01(admin, minter, timelock, address(router), donId, subscriptionId, callbackGasLimit, source);
+        token = new Aside0x01(baseURI, admin, minter, timelock, address(router), donId, subscriptionId, callbackGasLimit, source);
         chainlinkToken = AsideChainlink(token);
         baseToken = AsideBase(token);
     }

@@ -2,10 +2,9 @@
 pragma solidity ^0.8.20;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import {ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
-abstract contract AsideBase is ERC721, ERC721URIStorage, AccessControl {
+abstract contract AsideBase is ERC721, AccessControl {
     error TokenLocked(uint256 tokenId);
     error TokenAlreadyUnlocked(uint256 tokenId);
     error InvalidPayload(string payload);
@@ -15,7 +14,7 @@ abstract contract AsideBase is ERC721, ERC721URIStorage, AccessControl {
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     uint256 public immutable TIMELOCK_DEADLINE;
-
+    string public BASE_URI;
     bool private _eUnlocked = false; // emergency unlock
     mapping(uint256 => bool) private _unlocks; // tokenId => isUnlocked
 
@@ -29,14 +28,18 @@ abstract contract AsideBase is ERC721, ERC721URIStorage, AccessControl {
      * @notice Creates a new AsideBase contract.
      * @param name_ The name of the token.
      * @param symbol_ The symbol of the token.
+     * @param baseURI_ The base URI of the token.
      * @param admin_ The address to set as the DEFAULT_ADMIN of this contract.
      * @param minter_ The address to set as the MINTER of this contract.
      * @param timelock_ The duration of the timelock upon which all tokens are automatically unlocked.
      */
-    constructor(string memory name_, string memory symbol_, address admin_, address minter_, uint256 timelock_) ERC721(name_, symbol_) {
+    constructor(string memory name_, string memory symbol_, string memory baseURI_, address admin_, address minter_, uint256 timelock_)
+        ERC721(name_, symbol_)
+    {
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
         _grantRole(MINTER_ROLE, minter_);
         TIMELOCK_DEADLINE = block.timestamp + timelock_;
+        BASE_URI = baseURI_;
     }
 
     /**
@@ -103,6 +106,10 @@ abstract contract AsideBase is ERC721, ERC721URIStorage, AccessControl {
     // #endregion
 
     // #region internal functions
+    function _baseURI() internal view override returns (string memory) {
+        return BASE_URI;
+    }
+
     function _areAllUnlocked() internal view returns (bool) {
         return block.timestamp >= TIMELOCK_DEADLINE || _eUnlocked;
     }
@@ -124,11 +131,7 @@ abstract contract AsideBase is ERC721, ERC721URIStorage, AccessControl {
     // #endregion
 
     // #region required overrides
-    function tokenURI(uint256 tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
-        return super.tokenURI(tokenId);
-    }
-
-    function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721URIStorage, AccessControl) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721, AccessControl) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
     // #endregion
