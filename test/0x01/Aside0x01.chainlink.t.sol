@@ -14,6 +14,7 @@ contract Aside0x01ChainlinkTest is Aside0x01TestHelper, AsideChainlinkTest {
     }
 
     function test_tokenIdOf() public mint {
+        vm.prank(admin);
         token.requestUnlock(tokenId);
         assertEq(token.tokenIdOf(router.REQUEST_ID()), tokenId);
     }
@@ -25,6 +26,7 @@ contract Aside0x01ChainlinkTest is Aside0x01TestHelper, AsideChainlinkTest {
     }
 
     function test_requestUnlock() public mint {
+        vm.prank(admin);
         token.requestUnlock(tokenId);
         assertEq(token.tokenIdOf(router.REQUEST_ID()), tokenId);
     }

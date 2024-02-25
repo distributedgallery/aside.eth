@@ -61,9 +61,17 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
         _setSource(source_);
     }
 
-    function requestUnlock(uint256 tokenId) external virtual;
-
     // #region admin-only functions
+    /**
+     * @notice Requests the unlock of token `tokenId`.
+     * @dev `tokenId` must exist.
+     * @dev `tokenId` must be locked.
+     * @param tokenId The id of the token to unlock.
+     */
+    function requestUnlock(uint256 tokenId) external isLocked(tokenId) onlyRole(DEFAULT_ADMIN_ROLE) {
+        _requestUnlock(tokenId);
+    }
+
     /**
      * @notice Sets the Chainlink Functions DON id.
      * @param donId_ The id of the Chainlink Functions DON.
@@ -157,7 +165,9 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
         return tokenId;
     }
 
-    function _requestUnlock(uint256 tokenId, FunctionsRequest.Request memory req) internal {
+    function _requestUnlock(uint256 tokenId) private {
+        FunctionsRequest.Request memory req;
+        req.initializeRequestForInlineJavaScript(source());
         bytes32 requestId = _sendRequest(req.encodeCBOR(), _subscriptionId, _callbackGasLimit, _donId);
         _tokenIds[requestId] = tokenId;
     }

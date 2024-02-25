@@ -4,14 +4,12 @@ pragma solidity ^0.8.20;
 import {AsideBase, AsideChainlink, FunctionsRequest} from "./AsideChainlink.sol";
 
 contract Aside0x01 is AsideChainlink {
-    using FunctionsRequest for FunctionsRequest.Request;
-
     error InvalidSentiment();
 
     uint8 public constant SENTIMENT_UNIT = 100;
     uint8 public constant SENTIMENT_INTERVAL = 10;
 
-    mapping(uint256 => uint8) private _sentiments; // tokenId => sentiment
+    mapping(uint256 => uint256) private _sentiments; // tokenId => sentiment
 
     /**
      * @notice Creates a new Aside0x01 contract.
@@ -54,32 +52,13 @@ contract Aside0x01 is AsideChainlink {
     /**
      * @inheritdoc AsideBase
      * @dev `tokenId` must be >= 1.
-     * @dev The payload must be a string of the form "SSSURI", where SSS is a 3 digits string defining the sentiment to associate to token
-     * `tokenId` and URI is the URI to associate to token `tokenId`.
+     *  The payload must be a string of the form "SSSURI", where SSS is a 3 digits string defining the sentiment to associate to token
+     * `tokenId`.
      * @dev The sentiment must be in the [0, 100] range.
      */
     function mint(address to, uint256 tokenId, string calldata payload) external override isValidTokenId(tokenId) onlyRole(MINTER_ROLE) {
-        if (bytes(payload).length < 4) revert InvalidPayload(payload);
-
-        uint8 sentiment = _castSentiment(payload[0:3]);
-        // string memory uri = payload[3:bytes(payload).length];
-
-        _sentiments[tokenId] = sentiment;
+        _sentiments[tokenId] = _safeCastSentiment(payload);
         _safeMint(to, tokenId);
-    }
-
-    /**
-     * @notice Requests the unlock of token `tokenId`.
-     * @dev `tokenId` must exist.
-     * @dev `tokenId` must be locked.
-     * @dev The AI sentiment fetched from Chainlink Functions must be in the range of token
-     * #`tokenId`'s associated sentiment.
-     * @param tokenId The id of the token to unlock.
-     */
-    function requestUnlock(uint256 tokenId) external override isLocked(tokenId) {
-        FunctionsRequest.Request memory req;
-        req.initializeRequestForInlineJavaScript(source());
-        _requestUnlock(tokenId, req);
     }
 
     /**
@@ -94,13 +73,12 @@ contract Aside0x01 is AsideChainlink {
         if (err.length > 0) revert InvalidUnlockCallback(err); // check if there is an error in the
             // request
         uint256 tokenId = _tokenIdOf(requestId);
-        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
-        if (_isUnlocked(tokenId)) revert TokenAlreadyUnlocked(tokenId);
-        uint256 sentiment = uint8(uint256(bytes32(response)));
+        _ensureLocked(tokenId);
+        uint256 sentiment = uint256(bytes32(response));
         uint256 expectedSentiment = _sentiments[tokenId];
         if (sentiment < expectedSentiment || sentiment >= expectedSentiment + SENTIMENT_INTERVAL) {
             revert InvalidUnlockRequest(tokenId, requestId);
-        } // check if sentiment is in the expected range
+        }
 
         _unlock(tokenId);
     }
@@ -112,7 +90,7 @@ contract Aside0x01 is AsideChainlink {
      * @dev `tokenId` must exist.
      * @return The sentiment associated to token `tokenId`.
      */
-    function sentimentOf(uint256 tokenId) public view returns (uint8) {
+    function sentimentOf(uint256 tokenId) public view returns (uint256) {
         _requireOwned(tokenId);
 
         return _sentiments[tokenId];
@@ -120,14 +98,16 @@ contract Aside0x01 is AsideChainlink {
     // #endregion
 
     // #region private functions
-    function _castSentiment(string memory _sentiment) private pure returns (uint8) {
+    function _safeCastSentiment(string memory _sentiment) private pure returns (uint8) {
+        if (bytes(_sentiment).length != 3) revert InvalidPayload(_sentiment);
+
         bytes memory b = bytes(_sentiment);
         uint8 sentiment = 0;
 
         for (uint8 i = 0; i < 3; i++) {
             uint8 c = uint8(b[i]);
             if (c >= 48 && c <= 57) sentiment = sentiment * 10 + (c - 48);
-            else revert InvalidSentiment();
+            else revert InvalidPayload(_sentiment);
         }
 
         if (sentiment > SENTIMENT_UNIT) revert InvalidSentiment();

@@ -23,17 +23,21 @@ contract Aside0x01BaseERC721Test is Aside0x01TestHelper, AsideBaseERC721Test {
     }
 
     function test_RevertWhen_mint_WithInvalidPayload() public mint {
-        vm.expectRevert(abi.encodeWithSelector(AsideBase.InvalidPayload.selector, "123"));
+        vm.expectRevert(abi.encodeWithSelector(AsideBase.InvalidPayload.selector, "11"));
         vm.prank(minter);
-        baseToken.mint(owner, 1, "123");
+        baseToken.mint(owner, 1, "11");
+
+        vm.expectRevert(abi.encodeWithSelector(AsideBase.InvalidPayload.selector, "1111"));
+        vm.prank(minter);
+        baseToken.mint(owner, 1, "1111");
+
+        vm.expectRevert(abi.encodeWithSelector(AsideBase.InvalidPayload.selector, "a3c"));
+        vm.prank(minter);
+        baseToken.mint(owner, 1, "a3c");
 
         vm.expectRevert(abi.encodeWithSelector(Aside0x01.InvalidSentiment.selector));
         vm.prank(minter);
-        baseToken.mint(owner, 1, "101a");
-
-        vm.expectRevert(abi.encodeWithSelector(Aside0x01.InvalidSentiment.selector));
-        vm.prank(minter);
-        baseToken.mint(owner, 1, "a10a");
+        baseToken.mint(owner, 1, "101");
     }
 
     function test_RevertWhen_mint_WithInvalidTokenId() public mint {

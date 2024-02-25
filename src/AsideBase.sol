@@ -19,8 +19,7 @@ abstract contract AsideBase is ERC721, AccessControl {
     mapping(uint256 => bool) private _unlocks; // tokenId => isUnlocked
 
     modifier isLocked(uint256 tokenId) {
-        _requireOwned(tokenId);
-        if (_isUnlocked(tokenId)) revert TokenAlreadyUnlocked(tokenId);
+        _ensureLocked(tokenId);
         _;
     }
 
@@ -106,6 +105,11 @@ abstract contract AsideBase is ERC721, AccessControl {
     // #endregion
 
     // #region internal functions
+    function _ensureLocked(uint256 tokenId) internal view {
+        _requireOwned(tokenId);
+        if (_isUnlocked(tokenId)) revert TokenAlreadyUnlocked(tokenId);
+    }
+
     function _baseURI() internal view override returns (string memory) {
         return BASE_URI;
     }
