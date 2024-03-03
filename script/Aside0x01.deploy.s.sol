@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "forge-std/Script.sol";
 import {Aside0x01} from "../src/Aside0x01.sol";
 
-contract DeployAside0x01 is Script {
+contract Aside0x01Deploy is Script {
     function run(
         string memory baseUri,
         address admin,
