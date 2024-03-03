@@ -12,22 +12,4 @@ contract Aside0x01ChainlinkTest is Aside0x01TestHelper, AsideChainlinkTest {
     function _mint(address to) internal override(Aside0x01TestHelper, AsideBaseTestHelper) {
         super._mint(to);
     }
-
-    function test_tokenIdOf() public mint {
-        vm.prank(admin);
-        token.requestUnlock(tokenId);
-        assertEq(token.tokenIdOf(router.REQUEST_ID()), tokenId);
-    }
-
-    function test_RevertWhen_tokenIdOf_InvalidRequestId() public {
-        bytes32 requestId = router.REQUEST_ID();
-        vm.expectRevert(abi.encodeWithSelector(AsideChainlink.InvalidRequestId.selector, requestId));
-        token.tokenIdOf(requestId);
-    }
-
-    function test_requestUnlock() public mint {
-        vm.prank(admin);
-        token.requestUnlock(tokenId);
-        assertEq(token.tokenIdOf(router.REQUEST_ID()), tokenId);
-    }
 }

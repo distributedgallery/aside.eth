@@ -11,18 +11,20 @@ abstract contract AsideBaseTestHelper is Test {
     event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
     event EmergencyUnlock(bool unlocked);
+    event Unlock(uint256 tokenId);
 
     AsideBase public baseToken;
     address public constant admin = address(0xA);
     address public constant minter = address(0xB);
+    address public constant unlocker = address(0xC);
     address public constant owner = address(0x01);
     address public constant operator = address(0x02);
     address public constant approved = address(0x03);
     address public constant recipient = address(0x04);
     uint256 public constant timelock = 365 days;
     uint256 public constant tokenId = 1;
-    string public constant baseURI = "ipfs://ipfs/Qm/";
-    string public constant tokenURI = "ipfs://ipfs/Qm/1";
+    string public constant baseURI = "ipfs://bafybeicy53j7e2er5kmft4rzj7ijr2cljgxxitnmmqztrdfst4i5z4pa74/";
+    string public constant tokenURI = "ipfs://bafybeicy53j7e2er5kmft4rzj7ijr2cljgxxitnmmqztrdfst4i5z4pa74/1";
 
     modifier unlock() {
         _reachTimelockDeadline();

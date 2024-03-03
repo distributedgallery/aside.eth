@@ -13,6 +13,7 @@ abstract contract AsideBase is ERC721, AccessControl {
     event EmergencyUnlock(bool unlocked);
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant UNLOCKER_ROLE = keccak256("UNLOCKER_ROLE");
     uint256 public immutable TIMELOCK_DEADLINE;
     string public BASE_URI;
     bool private _eUnlocked = false; // emergency unlock
@@ -30,13 +31,21 @@ abstract contract AsideBase is ERC721, AccessControl {
      * @param baseURI_ The base URI of the token.
      * @param admin_ The address to set as the DEFAULT_ADMIN of this contract.
      * @param minter_ The address to set as the MINTER of this contract.
+     * @param unlocker_ The address to set as the UNLOCKER of this contract.
      * @param timelock_ The duration of the timelock upon which all tokens are automatically unlocked.
      */
-    constructor(string memory name_, string memory symbol_, string memory baseURI_, address admin_, address minter_, uint256 timelock_)
-        ERC721(name_, symbol_)
-    {
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        string memory baseURI_,
+        address admin_,
+        address minter_,
+        address unlocker_,
+        uint256 timelock_
+    ) ERC721(name_, symbol_) {
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
         _grantRole(MINTER_ROLE, minter_);
+        _grantRole(UNLOCKER_ROLE, unlocker_);
         TIMELOCK_DEADLINE = block.timestamp + timelock_;
         BASE_URI = baseURI_;
     }
@@ -48,6 +57,16 @@ abstract contract AsideBase is ERC721, AccessControl {
      * @param payload The payload to be used for the token to be minted.
      */
     function mint(address to, uint256 tokenId, string calldata payload) external virtual;
+
+    /**
+     * @notice Unlock token `tokenId`.
+     * @dev `tokenId` must exist.
+     * @dev `tokenId` must be locked.
+     * @param tokenId The id of the token to unlock.
+     */
+    function unlock(uint256 tokenId) external virtual;
+
+    // function unlock(uint256 tokenId) external payable virtual;
 
     // #region admin-only functions
     /**

@@ -13,5 +13,5 @@ abstract contract AsideChainlinkTestHelper is AsideBaseTestHelper {
     uint64 public subscriptionId = 1;
     uint32 public callbackGasLimit = 100_000;
     string public source =
-        "const response = await Functions.makeHttpRequest({url:'https://aside-js.vercel.app/api/aisentiment', method: 'GET'});if (response.error) {throw Error('Request failed');}return Functions.encodeUint256(response.data.sentiment.toFixed(2)*100);";
+        "const response = await Functions.makeHttpRequest({url:'https://aside.distributedgallery.art/api/aisentiment',method:'GET'});if (response.error) {throw Error('Request failed');}return Functions.encodeUint256(response.data.sentiment);";
 }

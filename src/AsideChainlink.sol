@@ -35,6 +35,7 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
      * @param baseURI_ The base URI of the token.
      * @param admin_ The address to set as the DEFAULT_ADMIN of this contract.
      * @param minter_ The address to set as the MINTER of this contract.
+     * @param unlocker_ The address to set as the UNLOCKER of this contract.
      * @param timelock_ The duration of the timelock upon which all tokens are automatically unlocked.
      * @param router_ The address of the Chainlink Functions router.
      * @param donId_ The id of the Chainlink Functions DON.
@@ -48,30 +49,30 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
         string memory baseURI_,
         address admin_,
         address minter_,
+        address unlocker_,
         uint256 timelock_,
         address router_,
         bytes32 donId_,
         uint64 subscriptionId_,
         uint32 callbackGasLimit_,
         string memory source_
-    ) AsideBase(name_, symbol_, baseURI_, admin_, minter_, timelock_) FunctionsClient(router_) {
+    ) AsideBase(name_, symbol_, baseURI_, admin_, minter_, unlocker_, timelock_) FunctionsClient(router_) {
         _setDonId(donId_);
         _setSubscriptionId(subscriptionId_);
         _setCallbackGasLimit(callbackGasLimit_);
         _setSource(source_);
     }
 
-    // #region admin-only functions
     /**
-     * @notice Requests the unlock of token `tokenId`.
-     * @dev `tokenId` must exist.
-     * @dev `tokenId` must be locked.
-     * @param tokenId The id of the token to unlock.
+     * @inheritdoc AsideBase
+     * @dev This function triggers a Chainlink Functions call. The unlock will only occur after the callback function is called [if the
+     * conditions to unlock token `tokenId` are met].
      */
-    function requestUnlock(uint256 tokenId) external isLocked(tokenId) onlyRole(DEFAULT_ADMIN_ROLE) {
+    function unlock(uint256 tokenId) external virtual override(AsideBase) isLocked(tokenId) onlyRole(UNLOCKER_ROLE) {
         _requestUnlock(tokenId);
     }
 
+    // #region admin-only functions
     /**
      * @notice Sets the Chainlink Functions DON id.
      * @param donId_ The id of the Chainlink Functions DON.
@@ -165,10 +166,10 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
         return tokenId;
     }
 
-    function _requestUnlock(uint256 tokenId) private {
-        FunctionsRequest.Request memory req;
-        req.initializeRequestForInlineJavaScript(source());
-        bytes32 requestId = _sendRequest(req.encodeCBOR(), _subscriptionId, _callbackGasLimit, _donId);
+    function _requestUnlock(uint256 tokenId) internal virtual {
+        FunctionsRequest.Request memory request;
+        request.initializeRequestForInlineJavaScript(_source);
+        bytes32 requestId = _sendRequest(request.encodeCBOR(), _subscriptionId, _callbackGasLimit, _donId);
         _tokenIds[requestId] = tokenId;
     }
 

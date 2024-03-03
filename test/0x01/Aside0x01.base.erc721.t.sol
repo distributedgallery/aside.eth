@@ -43,6 +43,6 @@ contract Aside0x01BaseERC721Test is Aside0x01TestHelper, AsideBaseERC721Test {
     function test_RevertWhen_mint_WithInvalidTokenId() public mint {
         vm.expectRevert(abi.encodeWithSelector(AsideChainlink.InvalidTokenId.selector));
         vm.prank(minter);
-        baseToken.mint(owner, 0, "payload");
+        baseToken.mint(owner, 0, "060");
     }
 }

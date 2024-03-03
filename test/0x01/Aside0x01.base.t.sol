@@ -14,8 +14,8 @@ contract Aside0x01BaseTest is Aside0x01TestHelper, AsideBaseTest {
     }
 
     function test_isUnlocked_WhenRegularUnlockHasBeenTriggered() public mint {
-        vm.prank(admin);
-        token.requestUnlock(tokenId);
+        vm.prank(unlocker);
+        token.unlock(tokenId);
         router.fulfillRequest(token, abi.encodePacked(sentiment), "");
         assertTrue(token.isUnlocked(tokenId));
     }

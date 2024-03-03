@@ -16,6 +16,7 @@ contract Aside0x01 is AsideChainlink {
      * @param baseURI_ The base URI of the token.
      * @param admin_ The address to set as the DEFAULT_ADMIN of this contract.
      * @param minter_ The address to set as the MINTER of this contract.
+     * @param unlocker_ The address to set as the UNLOCKER of this contract.
      * @param timelock_ The duration of the timelock upon which all tokens are automatically unlocked.
      * @param router_ The address of the Chainlink Functions router.
      * @param donId_ The id of the Chainlink Functions DON.
@@ -27,6 +28,7 @@ contract Aside0x01 is AsideChainlink {
         string memory baseURI_,
         address admin_,
         address minter_,
+        address unlocker_,
         uint256 timelock_,
         address router_,
         bytes32 donId_,
@@ -40,6 +42,7 @@ contract Aside0x01 is AsideChainlink {
             baseURI_,
             admin_,
             minter_,
+            unlocker_,
             timelock_,
             router_,
             donId_,
@@ -52,7 +55,7 @@ contract Aside0x01 is AsideChainlink {
     /**
      * @inheritdoc AsideBase
      * @dev `tokenId` must be >= 1.
-     *  The payload must be a string of the form "SSSURI", where SSS is a 3 digits string defining the sentiment to associate to token
+     * @dev The payload must be a string of the form "SSSURI", where SSS is a 3 digits string defining the sentiment to associate to token
      * `tokenId`.
      * @dev The sentiment must be in the [0, 100] range.
      */
@@ -62,16 +65,13 @@ contract Aside0x01 is AsideChainlink {
     }
 
     /**
-     * @notice Callback function for fulfilling a request.
-     * @param requestId The ID of the request to fulfill.
+     * @notice Callback function for fulfilling a Chainlink Functions request.
+     * @param requestId The id of the request to fulfill.
      * @param response The HTTP response data.
-     * @param err Any errors from the Functions request.
+     * @param err Any errors from the Chainlink Functions request.
      */
     function fulfillRequest(bytes32 requestId, bytes memory response, bytes memory err) internal override {
-        // if (requestId != _currentRequestId) revert InvalidRequestId(_currentRequestId, requestId); //
-        // check if requests match
-        if (err.length > 0) revert InvalidUnlockCallback(err); // check if there is an error in the
-            // request
+        if (err.length > 0) revert InvalidUnlockCallback(err);
         uint256 tokenId = _tokenIdOf(requestId);
         _ensureLocked(tokenId);
         uint256 sentiment = uint256(bytes32(response));
