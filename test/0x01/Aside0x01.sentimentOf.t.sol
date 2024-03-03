@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Aside0x01TestHelper, IERC721Errors} from "./Aside0x01TestHelper.t.sol";
 
-contract Aside0x01BaseTest is Aside0x01TestHelper {
+contract SentimentOf is Aside0x01TestHelper {
     function test_sentimentOf() public mint {
         assertEq(token.sentimentOf(tokenId), sentiment);
     }

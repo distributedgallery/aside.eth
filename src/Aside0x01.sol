@@ -55,7 +55,7 @@ contract Aside0x01 is AsideChainlink {
     /**
      * @inheritdoc AsideBase
      * @dev `tokenId` must be >= 1.
-     * @dev The payload must be a string of the form "SSSURI", where SSS is a 3 digits string defining the sentiment to associate to token
+     * @dev The payload must be a string of the form "SSS", where SSS is a 3 digits string defining the sentiment to associate to token
      * `tokenId`.
      * @dev The sentiment must be in the [0, 100] range.
      */
@@ -75,14 +75,13 @@ contract Aside0x01 is AsideChainlink {
         uint256 tokenId = _tokenIdOf(requestId);
         _ensureLocked(tokenId);
         uint256 sentiment = uint256(bytes32(response));
-        uint256 expectedSentiment = _sentiments[tokenId];
-        if (sentiment < expectedSentiment || sentiment >= expectedSentiment + SENTIMENT_INTERVAL) {
+        uint256 expected = _sentiments[tokenId];
+        if (sentiment < expected || sentiment >= expected + SENTIMENT_INTERVAL) {
             revert InvalidUnlockRequest(tokenId, requestId);
         }
 
         _unlock(tokenId);
     }
-    // #endregion
 
     // #region getters
     /**

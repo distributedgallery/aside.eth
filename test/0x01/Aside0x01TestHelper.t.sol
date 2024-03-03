@@ -7,7 +7,9 @@ import {
     AsideChainlink,
     AsideChainlinkTestHelper,
     AsideChainlinkRouter,
-    IERC721Errors
+    FunctionsClient,
+    IERC721Errors,
+    IAccessControl
 } from "../helpers/AsideChainlink/AsideChainlinkTestHelper.t.sol";
 import {Aside0x01} from "../../src/Aside0x01.sol";
 

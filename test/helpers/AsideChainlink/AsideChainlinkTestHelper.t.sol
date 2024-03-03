@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {AsideChainlinkRouter} from "./AsideChainlinkRouter.t.sol";
 import {AsideBase, AsideBaseTestHelper, IERC721Errors, IAccessControl} from "../AsideBase/AsideBaseTestHelper.t.sol";
-import {AsideChainlink} from "../../../src/AsideChainlink.sol";
+import {AsideChainlink, FunctionsClient} from "../../../src/AsideChainlink.sol";
 
 abstract contract AsideChainlinkTestHelper is AsideBaseTestHelper {
     AsideChainlink public chainlinkToken;
