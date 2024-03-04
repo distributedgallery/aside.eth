@@ -2,7 +2,7 @@
 
 source .env
 
-if [ $# != 2 ]; then
+if [ $# != 1 ]; then
   echo "Please provide a token id."
   exit 1
 fi
