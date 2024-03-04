@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {AsideBase, AsideChainlink, FunctionsRequest} from "./AsideChainlink.sol";
+import {AsideBase, AsideChainlink} from "./AsideChainlink.sol";
 
 contract Aside0x01 is AsideChainlink {
     error InvalidSentiment();

@@ -78,17 +78,6 @@ abstract contract AsideBase is ERC721, AccessControl {
 
         emit EmergencyUnlock(true);
     }
-
-    /**
-     * @notice Cancels any emergency unlock.
-     * @dev This function is only to be used in case an emergency unlock has been triggered by
-     * mistake.
-     */
-    function eRelock() external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _eUnlocked = false;
-
-        emit EmergencyUnlock(false);
-    }
     // #endregion
 
     // #region getter functions
