@@ -10,7 +10,6 @@ abstract contract AsideBase is ERC721, AccessControl {
     error InvalidPayload(string payload);
 
     event Unlock(uint256 indexed tokenId);
-    event EmergencyUnlock(bool unlocked);
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant UNLOCKER_ROLE = keccak256("UNLOCKER_ROLE");
