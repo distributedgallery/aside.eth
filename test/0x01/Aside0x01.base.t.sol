@@ -35,12 +35,6 @@ contract Aside0x01BaseTest is Aside0x01TestHelper, AsideBaseTest {
         baseToken.mint(owner, 1, "101");
     }
 
-    function test_RevertWhen_mint_WithInvalidTokenId() public {
-        vm.expectRevert(abi.encodeWithSelector(AsideChainlink.InvalidTokenId.selector));
-        vm.prank(minter);
-        baseToken.mint(owner, 0, "060");
-    }
-
     function test_RevertWhen_mint_FromUnauthoried() public mint {
         vm.expectRevert(
             abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, address(this), baseToken.MINTER_ROLE())
@@ -50,7 +44,7 @@ contract Aside0x01BaseTest is Aside0x01TestHelper, AsideBaseTest {
 
     function test_isUnlocked_WhenRegularUnlockHasBeenTriggered() public mint {
         vm.prank(unlocker);
-        token.unlock(tokenId);
+        token.unlock(_tokenIds());
         router.fulfillRequest(token, abi.encodePacked(sentiment), "");
         assertTrue(token.isUnlocked(tokenId));
     }

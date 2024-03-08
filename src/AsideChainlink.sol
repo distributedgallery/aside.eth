@@ -12,21 +12,16 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
     error InvalidSubscriptionId();
     error InvalidCallbackGasLimit();
     error InvalidSource();
-    error InvalidTokenId();
+    error InvalidTokenIds();
     error InvalidRequestId(bytes32 requestId);
-    error InvalidUnlockRequest(uint256 tokenId, bytes32 requestId);
     error InvalidUnlockCallback(bytes err);
+    error InvalidUnlockRequest(uint256 tokenId, bytes32 requestId);
 
     bytes32 private _donId;
     uint64 private _subscriptionId;
     uint32 private _callbackGasLimit;
     string private _source;
-    mapping(bytes32 => uint256) private _tokenIds; // requestId => tokenId
-
-    modifier isValidTokenId(uint256 tokenId) {
-        if (tokenId == uint256(0)) revert InvalidTokenId();
-        _;
-    }
+    mapping(bytes32 => uint256[]) private _tokenIds; // requestId => tokenIds
 
     /**
      * @notice Creates a new AsideChainlink contract.
@@ -65,11 +60,16 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
 
     /**
      * @inheritdoc AsideBase
-     * @dev This function triggers a Chainlink Functions call. The unlock will only occur after the callback function is called [if the
-     * conditions to unlock token `tokenId` are met].
+     * @dev This function triggers a Chainlink Functions call. The unlocks only occur after the callback function is called [if the
+     * conditions to unlock tokens `tokenIds` are met].
      */
-    function unlock(uint256 tokenId) external virtual override(AsideBase) isLocked(tokenId) onlyRole(UNLOCKER_ROLE) {
-        _requestUnlock(tokenId);
+    function unlock(uint256[] calldata tokenIds) external virtual override(AsideBase) onlyRole(UNLOCKER_ROLE) {
+        uint256 length = tokenIds.length;
+        if (length == uint256(0)) revert InvalidTokenIds();
+        for (uint256 i = 0; i < length; i++) {
+            _ensureLocked(tokenIds[i]);
+        }
+        _requestUnlock(tokenIds);
     }
 
     // #region admin-only functions
@@ -153,24 +153,27 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
      * @param requestId The id of the request to get the tokenId associated to.
      * @return The tokenId associated to the request `requestId`.
      */
-    function tokenIdOf(bytes32 requestId) public view returns (uint256) {
-        return _tokenIdOf(requestId);
+    function tokenIdsOf(bytes32 requestId) public view returns (uint256[] memory) {
+        return _tokenIdsOf(requestId);
     }
     // #endregion
 
     // #region internal / private functions
-    function _tokenIdOf(bytes32 requestId) internal view returns (uint256) {
-        uint256 tokenId = _tokenIds[requestId];
-        if (tokenId == uint256(0)) revert InvalidRequestId(requestId);
-
-        return tokenId;
-    }
-
-    function _requestUnlock(uint256 tokenId) internal virtual {
+    function _requestUnlock(uint256[] memory tokenIds) internal virtual {
         FunctionsRequest.Request memory request;
         request.initializeRequestForInlineJavaScript(_source);
-        bytes32 requestId = _sendRequest(request.encodeCBOR(), _subscriptionId, _callbackGasLimit, _donId);
-        _tokenIds[requestId] = tokenId;
+        _setTokenIds(_sendRequest(request.encodeCBOR(), _subscriptionId, _callbackGasLimit, _donId), tokenIds);
+    }
+
+    function _tokenIdsOf(bytes32 requestId) internal view returns (uint256[] storage) {
+        uint256[] storage tokenIds = _tokenIds[requestId];
+        if (tokenIds.length == uint256(0)) revert InvalidRequestId(requestId);
+
+        return tokenIds;
+    }
+
+    function _setTokenIds(bytes32 requestId, uint256[] memory tokenIds) internal {
+        _tokenIds[requestId] = tokenIds;
     }
 
     function _setDonId(bytes32 donId_) private {

@@ -54,12 +54,11 @@ contract Aside0x01 is AsideChainlink {
 
     /**
      * @inheritdoc AsideBase
-     * @dev `tokenId` must be >= 1.
      * @dev The payload must be a string of the form "SSS", where SSS is a 3 digits string defining the sentiment to associate to token
      * `tokenId`.
      * @dev The sentiment must be in the [0, 100] range.
      */
-    function mint(address to, uint256 tokenId, string calldata payload) external override isValidTokenId(tokenId) onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 tokenId, string calldata payload) external override onlyRole(MINTER_ROLE) {
         _sentiments[tokenId] = _safeCastSentiment(payload);
         _safeMint(to, tokenId);
     }
@@ -72,15 +71,18 @@ contract Aside0x01 is AsideChainlink {
      */
     function fulfillRequest(bytes32 requestId, bytes memory response, bytes memory err) internal override {
         if (err.length > 0) revert InvalidUnlockCallback(err);
-        uint256 tokenId = _tokenIdOf(requestId);
-        _ensureLocked(tokenId);
+        uint256[] storage tokenIds = _tokenIdsOf(requestId);
         uint256 sentiment = uint256(bytes32(response));
-        uint256 expected = _sentiments[tokenId];
-        if (sentiment < expected || sentiment >= expected + SENTIMENT_INTERVAL) {
-            revert InvalidUnlockRequest(tokenId, requestId);
+        uint256 length = tokenIds.length;
+        for (uint256 i = 0; i < length; i++) {
+            uint256 tokenId = tokenIds[i];
+            _ensureLocked(tokenId);
+            uint256 expected = _sentiments[tokenId];
+            if (sentiment < expected || sentiment >= expected + SENTIMENT_INTERVAL) {
+                revert InvalidUnlockRequest(tokenId, requestId);
+            }
+            _unlock(tokenId);
         }
-
-        _unlock(tokenId);
     }
 
     // #region getters

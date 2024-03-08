@@ -6,7 +6,7 @@ import {Aside0x01TestHelper, AsideChainlink, AsideBase, FunctionsClient} from ".
 contract FulfillRequest is Aside0x01TestHelper {
     function test_fulfillRequest() public mint {
         vm.prank(unlocker);
-        token.unlock(tokenId);
+        token.unlock(_tokenIds());
 
         vm.expectEmit(true, true, true, true);
         emit Unlock(tokenId);
@@ -17,7 +17,7 @@ contract FulfillRequest is Aside0x01TestHelper {
 
     function test_RevertWhen_fulfillRequest_WithInvalidSentiment() public mint {
         vm.prank(unlocker);
-        token.unlock(tokenId);
+        token.unlock(_tokenIds());
 
         vm.expectRevert(abi.encodeWithSelector(AsideChainlink.InvalidUnlockRequest.selector, tokenId, router.REQUEST_ID()));
         router.fulfillRequest(token, abi.encodePacked(sentiment - 1), "");
@@ -28,7 +28,7 @@ contract FulfillRequest is Aside0x01TestHelper {
 
     function test_RevertWhen_fulfillRequest_WithError() public mint {
         vm.prank(unlocker);
-        token.unlock(tokenId);
+        token.unlock(_tokenIds());
 
         vm.expectRevert(abi.encodeWithSelector(AsideChainlink.InvalidUnlockCallback.selector, "This is an error"));
         router.fulfillRequest(token, abi.encodePacked(sentiment), "This is an error");
@@ -36,7 +36,7 @@ contract FulfillRequest is Aside0x01TestHelper {
 
     function test_RevertWhen_fulfillRequest_ForAlreadyUnlockedToken() public mint {
         vm.prank(unlocker);
-        token.unlock(tokenId);
+        token.unlock(_tokenIds());
         router.fulfillRequest(token, abi.encodePacked(sentiment), "");
 
         vm.expectRevert(abi.encodeWithSelector(AsideBase.TokenAlreadyUnlocked.selector, tokenId));

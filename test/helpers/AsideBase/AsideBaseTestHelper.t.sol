@@ -36,6 +36,16 @@ abstract contract AsideBaseTestHelper is Test {
         _;
     }
 
+    function _tokenIds() public pure returns (uint256[] memory tokenIds) {
+        tokenIds = new uint256[](1);
+        tokenIds[0] = tokenId;
+    }
+
+    function _tokenIds(uint256 _tokenId) public pure returns (uint256[] memory tokenIds) {
+        tokenIds = new uint256[](1);
+        tokenIds[0] = _tokenId;
+    }
+
     function _reachTimelockDeadline() internal {
         vm.warp(baseToken.TIMELOCK_DEADLINE());
     }

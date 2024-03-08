@@ -19,11 +19,6 @@ abstract contract AsideBase is ERC721, AccessControl {
     bool private _eUnlocked = false; // emergency unlock
     mapping(uint256 => bool) private _unlocks; // tokenId => isUnlocked
 
-    modifier isLocked(uint256 tokenId) {
-        _ensureLocked(tokenId);
-        _;
-    }
-
     /**
      * @notice Creates a new AsideBase contract.
      * @param name_ The name of the token.
@@ -59,14 +54,12 @@ abstract contract AsideBase is ERC721, AccessControl {
     function mint(address to, uint256 tokenId, string calldata payload) external virtual;
 
     /**
-     * @notice Unlock token `tokenId`.
-     * @dev `tokenId` must exist.
-     * @dev `tokenId` must be locked.
-     * @param tokenId The id of the token to unlock.
+     * @notice Unlock tokens `tokenIds`.
+     * @dev Each tokenId in `tokenIds` must exist.
+     * @dev Each tokenId in `tokenIds` must be locked.
+     * @param tokenIds The ids of the tokens to unlock.
      */
-    function unlock(uint256 tokenId) external virtual;
-
-    // function unlock(uint256 tokenId) external payable virtual;
+    function unlock(uint256[] calldata tokenIds) external virtual;
 
     // #region admin-only functions
     /**

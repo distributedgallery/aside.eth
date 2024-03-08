@@ -6,13 +6,15 @@ import {AsideChainlinkTestHelper, AsideChainlink} from "../AsideChainlinkTestHel
 abstract contract TokenIdOf is AsideChainlinkTestHelper {
     function test_tokenIdOf() public mint {
         vm.prank(unlocker);
-        chainlinkToken.unlock(tokenId);
-        assertEq(chainlinkToken.tokenIdOf(router.REQUEST_ID()), tokenId);
+        chainlinkToken.unlock(_tokenIds());
+        uint256[] memory tokenIds = chainlinkToken.tokenIdsOf(router.REQUEST_ID());
+        assertEq(tokenIds.length, 1);
+        assertEq(tokenIds[0], tokenId);
     }
 
     function test_RevertWhen_tokenIdOf_InvalidRequestId() public {
         bytes32 requestId = router.REQUEST_ID();
         vm.expectRevert(abi.encodeWithSelector(AsideChainlink.InvalidRequestId.selector, requestId));
-        chainlinkToken.tokenIdOf(requestId);
+        chainlinkToken.tokenIdsOf(requestId);
     }
 }

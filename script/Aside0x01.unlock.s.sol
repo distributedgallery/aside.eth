@@ -8,7 +8,9 @@ contract Aside0x01Unlock is Script {
     function run(address deployed, uint256 tokenId) external {
         vm.startBroadcast();
         Aside0x01 token = Aside0x01(deployed);
-        token.unlock(tokenId);
+        uint256[] memory tokenIds = new uint256[](1);
+        tokenIds[0] = tokenId;
+        token.unlock(tokenIds);
         vm.stopBroadcast();
     }
 }
