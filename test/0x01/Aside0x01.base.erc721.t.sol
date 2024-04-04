@@ -13,6 +13,10 @@ contract Aside0x01BaseERC721Test is Aside0x01TestHelper, AsideBaseERC721Test {
         super._mint(to);
     }
 
+    function _setUpUnlockConditions() internal override(Aside0x01TestHelper, AsideBaseTestHelper) {
+        super._setUpUnlockConditions();
+    }
+
     function test_metadata() public {
         assertEq(baseToken.name(), "Aside0x01");
         assertEq(baseToken.symbol(), "ASD0x01");

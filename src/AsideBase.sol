@@ -8,12 +8,12 @@ abstract contract AsideBase is ERC721, AccessControl {
     error TokenLocked(uint256 tokenId);
     error TokenAlreadyUnlocked(uint256 tokenId);
     error InvalidPayload(string payload);
+    error InvalidUnlock(uint256 tokenId);
 
     event Unlock(uint256 indexed tokenId);
     event EmergencyUnlock(bool unlocked);
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant UNLOCKER_ROLE = keccak256("UNLOCKER_ROLE");
     uint256 public immutable TIMELOCK_DEADLINE;
     string public BASE_URI;
     bool private _eUnlocked = false; // emergency unlock
@@ -26,21 +26,13 @@ abstract contract AsideBase is ERC721, AccessControl {
      * @param baseURI_ The base URI of the token.
      * @param admin_ The address to set as the DEFAULT_ADMIN of this contract.
      * @param minter_ The address to set as the MINTER of this contract.
-     * @param unlocker_ The address to set as the UNLOCKER of this contract.
      * @param timelock_ The duration of the timelock upon which all tokens are automatically unlocked.
      */
-    constructor(
-        string memory name_,
-        string memory symbol_,
-        string memory baseURI_,
-        address admin_,
-        address minter_,
-        address unlocker_,
-        uint256 timelock_
-    ) ERC721(name_, symbol_) {
+    constructor(string memory name_, string memory symbol_, string memory baseURI_, address admin_, address minter_, uint256 timelock_)
+        ERC721(name_, symbol_)
+    {
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
         _grantRole(MINTER_ROLE, minter_);
-        _grantRole(UNLOCKER_ROLE, unlocker_);
         TIMELOCK_DEADLINE = block.timestamp + timelock_;
         BASE_URI = baseURI_;
     }
@@ -49,9 +41,22 @@ abstract contract AsideBase is ERC721, AccessControl {
      * @notice Mints `tokenId`, transfers it to `to` and checks for `to` acceptance.
      * @param to The address to receive the token to be minted.
      * @param tokenId The id of the token to be minted.
+     */
+    function mint(address to, uint256 tokenId) external onlyRole(MINTER_ROLE) {
+        _safeMint(to, tokenId);
+        _afterMint(to, tokenId, "");
+    }
+
+    /**
+     * @notice Mints `tokenId`, transfers it to `to` and checks for `to` acceptance.
+     * @param to The address to receive the token to be minted.
+     * @param tokenId The id of the token to be minted.
      * @param payload The payload to be used for the token to be minted.
      */
-    function mint(address to, uint256 tokenId, string calldata payload) external virtual;
+    function mint(address to, uint256 tokenId, string calldata payload) external onlyRole(MINTER_ROLE) {
+        _safeMint(to, tokenId);
+        _afterMint(to, tokenId, payload);
+    }
 
     /**
      * @notice Unlock tokens `tokenIds`.
@@ -59,7 +64,10 @@ abstract contract AsideBase is ERC721, AccessControl {
      * @dev Each tokenId in `tokenIds` must be locked.
      * @param tokenIds The ids of the tokens to unlock.
      */
-    function unlock(uint256[] calldata tokenIds) external virtual;
+    function unlock(uint256[] calldata tokenIds) external {
+        _beforeUnlock(tokenIds);
+        _unlock(tokenIds);
+    }
 
     // #region admin-only functions
     /**
@@ -123,10 +131,23 @@ abstract contract AsideBase is ERC721, AccessControl {
         return _unlocks[tokenId] || _areAllUnlocked();
     }
 
-    function _unlock(uint256 tokenId) internal {
-        _unlocks[tokenId] = true;
+    // on peut le passer directement dans la function unlock publique parce que c'est appelé nul part ?
+    function _unlock(uint256[] memory tokenIds) internal {
+        uint256 length = tokenIds.length;
+        for (uint256 i = 0; i < length; i++) {
+            uint256 tokenId = tokenIds[i];
+            _unlocks[tokenId] = true;
+            emit Unlock(tokenId);
+        }
+    }
 
-        emit Unlock(tokenId);
+    function _afterMint(address, uint256, string memory) internal virtual {}
+
+    function _beforeUnlock(uint256[] memory tokenIds) internal virtual {
+        uint256 length = tokenIds.length;
+        for (uint256 i = 0; i < length; i++) {
+            _ensureLocked(tokenIds[i]);
+        }
     }
 
     function _update(address to, uint256 tokenId, address auth) internal override(ERC721) returns (address) {

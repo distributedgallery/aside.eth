@@ -13,11 +13,25 @@ contract Aside0x01BaseTest is Aside0x01TestHelper, AsideBaseTest {
         super._mint(to);
     }
 
-    function test_mint() public mint {
+    function _setUpUnlockConditions() internal override(Aside0x01TestHelper, AsideBaseTestHelper) {
+        super._setUpUnlockConditions();
+    }
+
+    function test_mint_WithPayload() public mint {
         assertEq(token.sentimentOf(tokenId), sentiment);
     }
 
+    function test_mint_WithoutPayload() public {
+        vm.expectRevert(abi.encodeWithSelector(AsideBase.InvalidPayload.selector, ""));
+        vm.prank(minter);
+        baseToken.mint(owner, 1);
+    }
+
     function test_RevertWhen_mint_WithInvalidPayload() public {
+        vm.expectRevert(abi.encodeWithSelector(AsideBase.InvalidPayload.selector, ""));
+        vm.prank(minter);
+        baseToken.mint(owner, 1, "");
+
         vm.expectRevert(abi.encodeWithSelector(AsideBase.InvalidPayload.selector, "11"));
         vm.prank(minter);
         baseToken.mint(owner, 1, "11");
@@ -42,10 +56,21 @@ contract Aside0x01BaseTest is Aside0x01TestHelper, AsideBaseTest {
         baseToken.mint(owner, 1, "060");
     }
 
-    function test_isUnlocked_WhenRegularUnlockHasBeenTriggered() public mint {
-        vm.prank(unlocker);
-        token.unlock(_tokenIds());
+    function test_isUnlocked_WhenRegularUnlockHasBeenTriggered() public mint update {
         router.fulfillRequest(token, abi.encodePacked(sentiment), "");
+        token.unlock(_tokenIds());
         assertTrue(token.isUnlocked(tokenId));
+    }
+
+    function test_RevertWhen_unlock_WithDeprecatedData() public mint setUpUnlockConditions {
+        vm.warp(block.timestamp + 1 hours + 1);
+        vm.expectRevert(abi.encodeWithSelector(AsideChainlink.DeprecatedData.selector));
+        baseToken.unlock(_tokenIds());
+    }
+
+    function test_RevertWhen_unlock_WithInvalidSentiment() public mint update {
+        router.fulfillRequest(token, abi.encodePacked(sentiment + token.SENTIMENT_INTERVAL()), "");
+        vm.expectRevert(abi.encodeWithSelector(AsideBase.InvalidUnlock.selector, tokenId));
+        baseToken.unlock(_tokenIds());
     }
 }

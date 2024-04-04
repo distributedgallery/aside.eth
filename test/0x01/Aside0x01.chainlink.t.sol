@@ -12,4 +12,8 @@ contract Aside0x01ChainlinkTest is Aside0x01TestHelper, AsideChainlinkTest {
     function _mint(address to) internal override(Aside0x01TestHelper, AsideBaseTestHelper) {
         super._mint(to);
     }
+
+    function _setUpUnlockConditions() internal override(Aside0x01TestHelper, AsideBaseTestHelper) {
+        super._setUpUnlockConditions();
+    }
 }

@@ -12,16 +12,26 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
     error InvalidSubscriptionId();
     error InvalidCallbackGasLimit();
     error InvalidSource();
-    error InvalidTokenIds();
     error InvalidRequestId(bytes32 requestId);
-    error InvalidUnlockCallback(bytes err);
-    error InvalidUnlockRequest(uint256 tokenId, bytes32 requestId);
+    error InvalidCallback(bytes err);
+    error DeprecatedData();
 
+    modifier onlyValidRequestId(bytes32 requestId) {
+        if (requestId != _lastRequestId) revert InvalidRequestId(requestId);
+        _;
+    }
+
+    modifier onlyValidCallback(bytes memory err) {
+        if (err.length != 0) revert InvalidCallback(err);
+        _;
+    }
+
+    bytes32 public constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
     bytes32 private _donId;
     uint64 private _subscriptionId;
     uint32 private _callbackGasLimit;
     string private _source;
-    mapping(bytes32 => uint256[]) private _tokenIds; // requestId => tokenIds
+    bytes32 private _lastRequestId;
 
     /**
      * @notice Creates a new AsideChainlink contract.
@@ -30,7 +40,7 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
      * @param baseURI_ The base URI of the token.
      * @param admin_ The address to set as the DEFAULT_ADMIN of this contract.
      * @param minter_ The address to set as the MINTER of this contract.
-     * @param unlocker_ The address to set as the UNLOCKER of this contract.
+     * @param updater_ The address to set as the UPDATER of this contract.
      * @param timelock_ The duration of the timelock upon which all tokens are automatically unlocked.
      * @param router_ The address of the Chainlink Functions router.
      * @param donId_ The id of the Chainlink Functions DON.
@@ -44,32 +54,29 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
         string memory baseURI_,
         address admin_,
         address minter_,
-        address unlocker_,
+        address updater_,
         uint256 timelock_,
         address router_,
         bytes32 donId_,
         uint64 subscriptionId_,
         uint32 callbackGasLimit_,
         string memory source_
-    ) AsideBase(name_, symbol_, baseURI_, admin_, minter_, unlocker_, timelock_) FunctionsClient(router_) {
+    ) AsideBase(name_, symbol_, baseURI_, admin_, minter_, timelock_) FunctionsClient(router_) {
+        _grantRole(UPDATER_ROLE, updater_);
         _setDonId(donId_);
         _setSubscriptionId(subscriptionId_);
         _setCallbackGasLimit(callbackGasLimit_);
         _setSource(source_);
     }
 
-    /**
-     * @inheritdoc AsideBase
-     * @dev This function triggers a Chainlink Functions call. The unlocks only occur after the callback function is called [if the
-     * conditions to unlock tokens `tokenIds` are met].
-     */
-    function unlock(uint256[] calldata tokenIds) external virtual override(AsideBase) onlyRole(UNLOCKER_ROLE) {
-        uint256 length = tokenIds.length;
-        if (length == uint256(0)) revert InvalidTokenIds();
-        for (uint256 i = 0; i < length; i++) {
-            _ensureLocked(tokenIds[i]);
-        }
-        _requestUnlock(tokenIds);
+    function update(string[] calldata args) external onlyRole(UPDATER_ROLE) {
+        FunctionsRequest.Request memory request;
+        request.initializeRequestForInlineJavaScript(_source);
+        if (args.length > 0) request.setArgs(args);
+        bytes32 requestId = _sendRequest(request.encodeCBOR(), _subscriptionId, _callbackGasLimit, _donId);
+        _lastRequestId = requestId;
+
+        _afterUpdate(requestId, args);
     }
 
     // #region admin-only functions
@@ -148,33 +155,16 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
     }
 
     /**
-     * @notice Returns the tokenId associated to the request `requestId`.
-     * @dev `requestId` must exist.
-     * @param requestId The id of the request to get the tokenId associated to.
-     * @return The tokenId associated to the request `requestId`.
+     * @notice Returns the id of the last request made to Chainlink Functions.
+     * @return The id of the last request made to Chainlink Functions.
      */
-    function tokenIdsOf(bytes32 requestId) public view returns (uint256[] memory) {
-        return _tokenIdsOf(requestId);
+    function lastRequestId() public view returns (bytes32) {
+        return _lastRequestId;
     }
     // #endregion
 
     // #region internal / private functions
-    function _requestUnlock(uint256[] memory tokenIds) internal virtual {
-        FunctionsRequest.Request memory request;
-        request.initializeRequestForInlineJavaScript(_source);
-        _setTokenIds(_sendRequest(request.encodeCBOR(), _subscriptionId, _callbackGasLimit, _donId), tokenIds);
-    }
-
-    function _tokenIdsOf(bytes32 requestId) internal view returns (uint256[] storage) {
-        uint256[] storage tokenIds = _tokenIds[requestId];
-        if (tokenIds.length == uint256(0)) revert InvalidRequestId(requestId);
-
-        return tokenIds;
-    }
-
-    function _setTokenIds(bytes32 requestId, uint256[] memory tokenIds) internal {
-        _tokenIds[requestId] = tokenIds;
-    }
+    function _afterUpdate(bytes32, /*requestId*/ string[] memory /*args*/ ) internal virtual {}
 
     function _setDonId(bytes32 donId_) private {
         if (donId_ == bytes32(0)) revert InvalidDonId();

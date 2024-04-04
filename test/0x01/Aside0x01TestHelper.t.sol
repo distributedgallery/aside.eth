@@ -28,9 +28,14 @@ abstract contract Aside0x01TestHelper is AsideChainlinkTestHelper {
         token.mint(to, tokenId, payload);
     }
 
+    function _setUpUnlockConditions() internal virtual override(AsideBaseTestHelper) {
+        _update();
+        router.fulfillRequest(token, abi.encodePacked(sentiment), "");
+    }
+
     function setUp() public {
         router = new AsideChainlinkRouter();
-        token = new Aside0x01(baseURI, admin, minter, unlocker, timelock, address(router), donId, subscriptionId, callbackGasLimit, source);
+        token = new Aside0x01(baseURI, admin, minter, updater, timelock, address(router), donId, subscriptionId, callbackGasLimit, source);
         chainlinkToken = AsideChainlink(token);
         baseToken = AsideBase(token);
     }

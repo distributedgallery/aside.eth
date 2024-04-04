@@ -9,6 +9,8 @@ contract Aside0x01 is AsideChainlink {
     uint8 public constant SENTIMENT_UNIT = 100;
     uint8 public constant SENTIMENT_INTERVAL = 10;
 
+    uint256 private _lastSentiment;
+    uint256 private _lastSentimentTimestamp;
     mapping(uint256 => uint256) private _sentiments; // tokenId => sentiment
 
     /**
@@ -53,39 +55,32 @@ contract Aside0x01 is AsideChainlink {
     {}
 
     /**
-     * @inheritdoc AsideBase
-     * @dev The payload must be a string of the form "SSS", where SSS is a 3 digits string defining the sentiment to associate to token
-     * `tokenId`.
-     * @dev The sentiment must be in the [0, 100] range.
-     */
-    function mint(address to, uint256 tokenId, string calldata payload) external override onlyRole(MINTER_ROLE) {
-        _sentiments[tokenId] = _safeCastSentiment(payload);
-        _safeMint(to, tokenId);
-    }
-
-    /**
      * @notice Callback function for fulfilling a Chainlink Functions request.
      * @param requestId The id of the request to fulfill.
      * @param response The HTTP response data.
      * @param err Any errors from the Chainlink Functions request.
      */
-    function fulfillRequest(bytes32 requestId, bytes memory response, bytes memory err) internal override {
-        if (err.length > 0) revert InvalidUnlockCallback(err);
-        uint256[] storage tokenIds = _tokenIdsOf(requestId);
-        uint256 sentiment = uint256(bytes32(response));
-        uint256 length = tokenIds.length;
-        for (uint256 i = 0; i < length; i++) {
-            uint256 tokenId = tokenIds[i];
-            _ensureLocked(tokenId);
-            uint256 expected = _sentiments[tokenId];
-            if (sentiment < expected || sentiment >= expected + SENTIMENT_INTERVAL) {
-                revert InvalidUnlockRequest(tokenId, requestId);
-            }
-            _unlock(tokenId);
-        }
+    function fulfillRequest(bytes32 requestId, bytes memory response, bytes memory err)
+        internal
+        override
+        onlyValidRequestId(requestId)
+        onlyValidCallback(err)
+    {
+        _lastSentiment = uint256(bytes32(response));
+        _lastSentimentTimestamp = block.timestamp;
     }
 
     // #region getters
+    /**
+     * @notice Returns the last AI sentiment fetched through Chainlink Functions and its timestamp.
+     * @return sentiment The last AI sentiment fetched through Chainlink Functions.
+     * @return timestamp The timestamp of the last AI sentiment fetched through Chainlink Functions.
+     */
+    function lastSentiment() public view returns (uint256 sentiment, uint256 timestamp) {
+        sentiment = _lastSentiment;
+        timestamp = _lastSentimentTimestamp;
+    }
+
     /**
      * @notice Returns the sentiment associated to token `tokenId`.
      * @dev `tokenId` must exist.
@@ -98,22 +93,48 @@ contract Aside0x01 is AsideChainlink {
     }
     // #endregion
 
-    // #region private functions
-    function _safeCastSentiment(string memory _sentiment) private pure returns (uint8) {
-        if (bytes(_sentiment).length != 3) revert InvalidPayload(_sentiment);
+    // #region internal / private functions
+    /**
+     * @dev The payload must be a string of the form "SSS", where SSS is a 3 digits string defining the sentiment to associate to token
+     * `tokenId`.
+     * @dev The sentiment must be in the [0, 100] range.
+     */
+    function _afterMint(address to, uint256 tokenId, string memory payload) internal override(AsideBase) {
+        _sentiments[tokenId] = _safeCastSentiment(payload);
+        super._afterMint(to, tokenId, payload);
+    }
 
-        bytes memory b = bytes(_sentiment);
-        uint8 sentiment = 0;
+    function _beforeUnlock(uint256[] memory tokenIds) internal override(AsideBase) {
+        super._beforeUnlock(tokenIds);
+
+        if (block.timestamp > _lastSentimentTimestamp + 1 hours) revert DeprecatedData();
+
+        uint256 length = tokenIds.length;
+        for (uint256 i = 0; i < length; i++) {
+            uint256 tokenId = tokenIds[i];
+            uint256 current = _lastSentiment;
+            uint256 expected = _sentiments[tokenId];
+            if (current < expected || current >= expected + SENTIMENT_INTERVAL) {
+                revert InvalidUnlock(tokenId);
+            }
+        }
+    }
+
+    function _safeCastSentiment(string memory sentiment_) private pure returns (uint8) {
+        if (bytes(sentiment_).length != 3) revert InvalidPayload(sentiment_);
+
+        bytes memory b = bytes(sentiment_);
+        uint8 s = 0;
 
         for (uint8 i = 0; i < 3; i++) {
             uint8 c = uint8(b[i]);
-            if (c >= 48 && c <= 57) sentiment = sentiment * 10 + (c - 48);
-            else revert InvalidPayload(_sentiment);
+            if (c >= 48 && c <= 57) s = s * 10 + (c - 48);
+            else revert InvalidPayload(sentiment_);
         }
 
-        if (sentiment > SENTIMENT_UNIT) revert InvalidSentiment();
+        if (s > SENTIMENT_UNIT) revert InvalidSentiment();
 
-        return sentiment;
+        return s;
     }
     // #endregion
 }

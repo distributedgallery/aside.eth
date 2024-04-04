@@ -16,7 +16,6 @@ abstract contract AsideBaseTestHelper is Test {
     AsideBase public baseToken;
     address public constant admin = address(0xA);
     address public constant minter = address(0xB);
-    address public constant unlocker = address(0xC);
     address public constant owner = address(0x01);
     address public constant operator = address(0x02);
     address public constant approved = address(0x03);
@@ -36,6 +35,11 @@ abstract contract AsideBaseTestHelper is Test {
         _;
     }
 
+    modifier setUpUnlockConditions() {
+        _setUpUnlockConditions();
+        _;
+    }
+
     function _tokenIds() public pure returns (uint256[] memory tokenIds) {
         tokenIds = new uint256[](1);
         tokenIds[0] = tokenId;
@@ -49,6 +53,8 @@ abstract contract AsideBaseTestHelper is Test {
     function _reachTimelockDeadline() internal {
         vm.warp(baseToken.TIMELOCK_DEADLINE());
     }
+
+    function _setUpUnlockConditions() internal virtual {}
 
     function _mint() internal virtual {}
 
