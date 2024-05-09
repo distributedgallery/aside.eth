@@ -12,7 +12,7 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
     error InvalidUnlock(uint256 tokenId);
 
     event Unlock(uint256 indexed tokenId);
-    event EmergencyUnlock(bool unlocked);
+    event EmergencyUnlock();
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     uint256 public immutable TIMELOCK_DEADLINE;
@@ -60,14 +60,19 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
     }
 
     /**
-     * @notice Unlock tokens `tokenIds`.
+     * @notice Unlocks tokens `tokenIds`.
      * @dev Each tokenId in `tokenIds` must exist.
      * @dev Each tokenId in `tokenIds` must be locked.
      * @param tokenIds The ids of the tokens to unlock.
      */
     function unlock(uint256[] calldata tokenIds) external {
         _beforeUnlock(tokenIds);
-        _unlock(tokenIds);
+        uint256 length = tokenIds.length;
+        for (uint256 i = 0; i < length; i++) {
+            uint256 tokenId = tokenIds[i];
+            _unlocks[tokenId] = true;
+            emit Unlock(tokenId);
+        }
     }
 
     // #region admin-only functions
@@ -78,7 +83,7 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
     function eUnlock() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _eUnlocked = true;
 
-        emit EmergencyUnlock(true);
+        emit EmergencyUnlock();
     }
     // #endregion
 
@@ -114,12 +119,7 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
     }
     // #endregion
 
-    // #region internal functions
-    function _ensureLocked(uint256 tokenId) internal view {
-        _requireOwned(tokenId);
-        if (_isUnlocked(tokenId)) revert TokenAlreadyUnlocked(tokenId);
-    }
-
+    // #region internal view functions
     function _baseURI() internal view override returns (string memory) {
         return BASE_URI;
     }
@@ -132,14 +132,16 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
         return _unlocks[tokenId] || _areAllUnlocked();
     }
 
-    // on peut le passer directement dans la function unlock publique parce que c'est appelé nul part ?
-    function _unlock(uint256[] memory tokenIds) internal {
-        uint256 length = tokenIds.length;
-        for (uint256 i = 0; i < length; i++) {
-            uint256 tokenId = tokenIds[i];
-            _unlocks[tokenId] = true;
-            emit Unlock(tokenId);
-        }
+    function _requireLocked(uint256 tokenId) internal view {
+        _requireOwned(tokenId);
+        if (_isUnlocked(tokenId)) revert TokenAlreadyUnlocked(tokenId);
+    }
+    // #endregion
+
+    // #region internal hook functions
+    function _update(address to, uint256 tokenId, address auth) internal override(ERC721) returns (address) {
+        if (!_isUnlocked(tokenId) && _ownerOf(tokenId) != address(0)) revert TokenLocked(tokenId);
+        return super._update(to, tokenId, auth);
     }
 
     function _afterMint(address, uint256, bytes memory) internal virtual {}
@@ -147,13 +149,8 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
     function _beforeUnlock(uint256[] memory tokenIds) internal virtual {
         uint256 length = tokenIds.length;
         for (uint256 i = 0; i < length; i++) {
-            _ensureLocked(tokenIds[i]);
+            _requireLocked(tokenIds[i]);
         }
-    }
-
-    function _update(address to, uint256 tokenId, address auth) internal override(ERC721) returns (address) {
-        if (!_isUnlocked(tokenId) && _ownerOf(tokenId) != address(0)) revert TokenLocked(tokenId);
-        return super._update(to, tokenId, auth);
     }
     // #endregion
 

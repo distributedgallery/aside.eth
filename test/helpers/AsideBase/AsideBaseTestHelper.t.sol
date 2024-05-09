@@ -10,7 +10,7 @@ abstract contract AsideBaseTestHelper is Test {
     event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
     event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
-    event EmergencyUnlock(bool unlocked);
+    event EmergencyUnlock();
     event Unlock(uint256 indexed tokenId);
 
     AsideBase public baseToken;

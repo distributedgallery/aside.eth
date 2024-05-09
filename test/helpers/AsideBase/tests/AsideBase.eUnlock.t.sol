@@ -5,8 +5,8 @@ import {AsideBaseTestHelper, IAccessControl} from "../AsideBaseTestHelper.t.sol"
 
 abstract contract EUnlock is AsideBaseTestHelper {
     function test_eUnlock() public {
-        vm.expectEmit(true, true, true, true);
-        emit EmergencyUnlock(true);
+        vm.expectEmit(address(baseToken));
+        emit EmergencyUnlock();
         vm.prank(admin);
         baseToken.eUnlock();
         assertTrue(baseToken.isEUnlocked());
