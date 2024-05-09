@@ -16,7 +16,7 @@ import {Aside0x01} from "../../src/Aside0x01.sol";
 abstract contract Aside0x01TestHelper is AsideChainlinkTestHelper {
     Aside0x01 public token;
     uint256 public sentiment = 60;
-    string public payload = "060";
+    bytes public payload = abi.encodePacked(sentiment);
 
     function _mint() internal virtual override(AsideBaseTestHelper) {
         vm.prank(minter);

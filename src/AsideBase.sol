@@ -2,12 +2,13 @@
 pragma solidity ^0.8.20;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {ERC721Burnable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
-abstract contract AsideBase is ERC721, AccessControl {
+abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
     error TokenLocked(uint256 tokenId);
     error TokenAlreadyUnlocked(uint256 tokenId);
-    error InvalidPayload(string payload);
+    error InvalidPayload(bytes payload);
     error InvalidUnlock(uint256 tokenId);
 
     event Unlock(uint256 indexed tokenId);
@@ -15,7 +16,7 @@ abstract contract AsideBase is ERC721, AccessControl {
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     uint256 public immutable TIMELOCK_DEADLINE;
-    string public BASE_URI;
+    string public BASE_URI; // strings cannot be immutable
     bool private _eUnlocked = false; // emergency unlock
     mapping(uint256 => bool) private _unlocks; // tokenId => isUnlocked
 
@@ -33,8 +34,8 @@ abstract contract AsideBase is ERC721, AccessControl {
     {
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
         _grantRole(MINTER_ROLE, minter_);
-        TIMELOCK_DEADLINE = block.timestamp + timelock_;
         BASE_URI = baseURI_;
+        TIMELOCK_DEADLINE = block.timestamp + timelock_;
     }
 
     /**
@@ -53,7 +54,7 @@ abstract contract AsideBase is ERC721, AccessControl {
      * @param tokenId The id of the token to be minted.
      * @param payload The payload to be used for the token to be minted.
      */
-    function mint(address to, uint256 tokenId, string calldata payload) external onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 tokenId, bytes memory payload) external onlyRole(MINTER_ROLE) {
         _safeMint(to, tokenId);
         _afterMint(to, tokenId, payload);
     }
@@ -141,7 +142,7 @@ abstract contract AsideBase is ERC721, AccessControl {
         }
     }
 
-    function _afterMint(address, uint256, string memory) internal virtual {}
+    function _afterMint(address, uint256, bytes memory) internal virtual {}
 
     function _beforeUnlock(uint256[] memory tokenIds) internal virtual {
         uint256 length = tokenIds.length;

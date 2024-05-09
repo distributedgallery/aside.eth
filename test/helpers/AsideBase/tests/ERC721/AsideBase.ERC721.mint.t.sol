@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
-import {AsideBaseTestHelper, IERC721Errors, IAccessControl} from "../../AsideBaseTestHelper.t.sol";
+import {AsideBaseTestHelper, IAccessControl, IERC721Errors} from "../../AsideBaseTestHelper.t.sol";
 import {
     IERC721Receiver,
     ERC721Recipient,
@@ -12,7 +12,7 @@ import {
 
 abstract contract Mint is AsideBaseTestHelper {
     function test_mint_ToEOA() public {
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(address(baseToken));
         emit Transfer(address(0), owner, tokenId);
         _mint();
 
@@ -23,8 +23,7 @@ abstract contract Mint is AsideBaseTestHelper {
 
     function test_mint_ToERC721Recipient() public {
         ERC721Recipient to = new ERC721Recipient();
-
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(address(baseToken));
         emit Transfer(address(0), address(to), tokenId);
         _mint(address(to));
 
@@ -50,9 +49,8 @@ abstract contract Mint is AsideBaseTestHelper {
         _mint(to);
     }
 
-    function test_RevertWhen_mint_ToERC721RecipientWithWrongReturnData() public {
+    function test_RevertWhen_mint_ToWrongReturnDataERC721Recipient() public {
         address to = address(new WrongReturnDataERC721Recipient());
-
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidReceiver.selector, to));
         _mint(to);
     }
@@ -66,7 +64,11 @@ abstract contract Mint is AsideBaseTestHelper {
         vm.expectRevert(
             abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, address(this), baseToken.MINTER_ROLE())
         );
-        baseToken.mint(owner, tokenId, "payload");
+        baseToken.mint(owner, tokenId);
+        vm.expectRevert(
+            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, address(this), baseToken.MINTER_ROLE())
+        );
+        baseToken.mint(owner, tokenId, "");
     }
 
     function test_RevertWhen_mint_ToZeroAddress() public {

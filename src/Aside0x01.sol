@@ -4,8 +4,6 @@ pragma solidity ^0.8.20;
 import {AsideBase, AsideChainlink} from "./AsideChainlink.sol";
 
 contract Aside0x01 is AsideChainlink {
-    error InvalidSentiment();
-
     uint8 public constant SENTIMENT_UNIT = 100;
     uint8 public constant SENTIMENT_INTERVAL = 10;
 
@@ -72,6 +70,13 @@ contract Aside0x01 is AsideChainlink {
 
     // #region getters
     /**
+     * @notice Exprimental function for testing purposes
+     */
+    function fromBytes(bytes memory b) public pure returns (uint256) {
+        return uint256(bytes32(b));
+    }
+
+    /**
      * @notice Returns the last AI sentiment fetched through Chainlink Functions and its timestamp.
      * @return sentiment The last AI sentiment fetched through Chainlink Functions.
      * @return timestamp The timestamp of the last AI sentiment fetched through Chainlink Functions.
@@ -95,12 +100,12 @@ contract Aside0x01 is AsideChainlink {
 
     // #region internal / private functions
     /**
-     * @dev The payload must be a string of the form "SSS", where SSS is a 3 digits string defining the sentiment to associate to token
-     * `tokenId`.
-     * @dev The sentiment must be in the [0, 100] range.
+     * @dev The payload must be a bytes encoded uint256 in the [0, 100] range.
      */
-    function _afterMint(address to, uint256 tokenId, string memory payload) internal override(AsideBase) {
-        _sentiments[tokenId] = _safeCastSentiment(payload);
+    function _afterMint(address to, uint256 tokenId, bytes memory payload) internal override(AsideBase) {
+        uint256 sentiment = uint256(bytes32(payload));
+        if (sentiment > SENTIMENT_UNIT) revert InvalidPayload(payload);
+        _sentiments[tokenId] = sentiment;
         super._afterMint(to, tokenId, payload);
     }
 
@@ -118,23 +123,6 @@ contract Aside0x01 is AsideChainlink {
                 revert InvalidUnlock(tokenId);
             }
         }
-    }
-
-    function _safeCastSentiment(string memory sentiment_) private pure returns (uint8) {
-        if (bytes(sentiment_).length != 3) revert InvalidPayload(sentiment_);
-
-        bytes memory b = bytes(sentiment_);
-        uint8 s = 0;
-
-        for (uint8 i = 0; i < 3; i++) {
-            uint8 c = uint8(b[i]);
-            if (c >= 48 && c <= 57) s = s * 10 + (c - 48);
-            else revert InvalidPayload(sentiment_);
-        }
-
-        if (s > SENTIMENT_UNIT) revert InvalidSentiment();
-
-        return s;
     }
     // #endregion
 }

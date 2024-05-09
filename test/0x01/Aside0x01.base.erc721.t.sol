@@ -5,6 +5,7 @@ import {Aside0x01TestHelper, AsideBaseTestHelper} from "./Aside0x01TestHelper.t.
 import {AsideBaseERC721Test} from "../helpers/AsideBase/tests/ERC721/AsideBase.ERC721.t.sol";
 
 contract Aside0x01BaseERC721Test is Aside0x01TestHelper, AsideBaseERC721Test {
+    // #region required overrides
     function _mint() internal override(Aside0x01TestHelper, AsideBaseTestHelper) {
         super._mint();
     }
@@ -16,6 +17,7 @@ contract Aside0x01BaseERC721Test is Aside0x01TestHelper, AsideBaseERC721Test {
     function _setUpUnlockConditions() internal override(Aside0x01TestHelper, AsideBaseTestHelper) {
         super._setUpUnlockConditions();
     }
+    // #endregion
 
     function test_metadata() public {
         assertEq(baseToken.name(), "Aside0x01");
