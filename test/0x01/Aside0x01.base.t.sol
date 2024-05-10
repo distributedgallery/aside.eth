@@ -37,13 +37,14 @@ contract Aside0x01BaseTest is Aside0x01TestHelper, AsideBaseTest {
     }
     // #endregion
 
-    // #region unlock
-    function test_isUnlocked_WhenRegularUnlockHasBeenTriggered() public mint update {
-        router.fulfillRequest(token, abi.encodePacked(sentiment), "");
+    // #region isUnlocked
+    function test_isUnlocked_WhenRegularUnlockHasBeenTriggered() public mint setUpUnlockConditions {
         token.unlock(_tokenIds());
         assertTrue(token.isUnlocked(tokenId));
     }
+    // #endregion
 
+    // #region unlock
     function test_RevertWhen_unlock_WithDeprecatedData() public mint setUpUnlockConditions {
         vm.warp(block.timestamp + 1 hours + 1);
         vm.expectRevert(abi.encodeWithSelector(AsideChainlink.DeprecatedData.selector));

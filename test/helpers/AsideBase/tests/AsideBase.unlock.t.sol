@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
-import {AsideBaseTestHelper, AsideBase, IERC721Errors, IAccessControl} from "../AsideBaseTestHelper.t.sol";
+import {AsideBase, AsideBaseTestHelper, IERC721Errors} from "../AsideBaseTestHelper.t.sol";
 
 abstract contract Unlock is AsideBaseTestHelper {
     function test_unlock() public mint setUpUnlockConditions {
         vm.expectEmit(address(baseToken));
         emit AsideBase.Unlock(tokenId);
-
         baseToken.unlock(_tokenIds());
 
         assertTrue(baseToken.isUnlocked(tokenId));

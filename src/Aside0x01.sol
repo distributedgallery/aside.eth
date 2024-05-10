@@ -98,7 +98,7 @@ contract Aside0x01 is AsideChainlink {
     }
     // #endregion
 
-    // #region internal / private functions
+    // #region internal hook functions
     /**
      * @dev The payload must be a bytes encoded uint256 in the [0, 100] range.
      */
@@ -106,6 +106,7 @@ contract Aside0x01 is AsideChainlink {
         uint256 sentiment = uint256(bytes32(payload));
         if (sentiment > SENTIMENT_UNIT) revert InvalidPayload(payload);
         _sentiments[tokenId] = sentiment;
+
         super._afterMint(to, tokenId, payload);
     }
 
