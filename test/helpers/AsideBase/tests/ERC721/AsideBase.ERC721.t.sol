@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.25;
 
 import {Approve} from "./AsideBase.ERC721.approve.t.sol";
 import {BalanceOf} from "./AsideBase.ERC721.balanceOf.t.sol";

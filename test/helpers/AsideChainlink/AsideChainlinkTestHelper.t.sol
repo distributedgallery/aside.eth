@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.25;
 
 import {AsideChainlinkRouter} from "./AsideChainlinkRouter.t.sol";
 import {AsideBase, AsideBaseTestHelper, IERC721Errors, IAccessControl} from "../AsideBase/AsideBaseTestHelper.t.sol";

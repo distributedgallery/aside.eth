@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.25;
 
 import {AsideBase, AsideChainlink} from "./AsideChainlink.sol";
 
 contract Aside0x01 is AsideChainlink {
-    uint8 public constant SENTIMENT_UNIT = 100;
-    uint8 public constant SENTIMENT_INTERVAL = 10;
+    uint256 public constant SENTIMENT_UNIT = 100;
+    uint256 public constant SENTIMENT_INTERVAL = 10;
 
     uint256 private _lastSentiment;
     uint256 private _lastSentimentTimestamp;
@@ -16,7 +16,7 @@ contract Aside0x01 is AsideChainlink {
      * @param baseURI_ The base URI of the token.
      * @param admin_ The address to set as the DEFAULT_ADMIN of this contract.
      * @param minter_ The address to set as the MINTER of this contract.
-     * @param unlocker_ The address to set as the UNLOCKER of this contract.
+     * @param updater_ The address to set as the UPDATER of this contract.
      * @param timelock_ The duration of the timelock upon which all tokens are automatically unlocked.
      * @param router_ The address of the Chainlink Functions router.
      * @param donId_ The id of the Chainlink Functions DON.
@@ -28,7 +28,7 @@ contract Aside0x01 is AsideChainlink {
         string memory baseURI_,
         address admin_,
         address minter_,
-        address unlocker_,
+        address updater_,
         uint256 timelock_,
         address router_,
         bytes32 donId_,
@@ -42,7 +42,7 @@ contract Aside0x01 is AsideChainlink {
             baseURI_,
             admin_,
             minter_,
-            unlocker_,
+            updater_,
             timelock_,
             router_,
             donId_,

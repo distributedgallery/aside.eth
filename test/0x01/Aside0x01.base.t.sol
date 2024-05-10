@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.25;
 
 import {AsideChainlink, AsideBase, Aside0x01TestHelper, AsideBaseTestHelper} from "./Aside0x01TestHelper.t.sol";
 import {AsideBaseTest} from "../helpers/AsideBase/tests/AsideBase.t.sol";
