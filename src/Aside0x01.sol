@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.25;
 
-import {AsideBase, AsideChainlink} from "./AsideChainlink.sol";
+import {AsideChainlink, AsideBase} from "./AsideChainlink.sol";
 
 contract Aside0x01 is AsideChainlink {
     uint256 public constant SENTIMENT_UNIT = 100;
@@ -52,23 +52,7 @@ contract Aside0x01 is AsideChainlink {
         )
     {}
 
-    /**
-     * @notice Callback function for fulfilling a Chainlink Functions request.
-     * @param requestId The id of the request to fulfill.
-     * @param response The HTTP response data.
-     * @param err Any errors from the Chainlink Functions request.
-     */
-    function fulfillRequest(bytes32 requestId, bytes memory response, bytes memory err)
-        internal
-        override
-        onlyValidRequestId(requestId)
-        onlyValidCallback(err)
-    {
-        _lastSentiment = uint256(bytes32(response));
-        _lastSentimentTimestamp = block.timestamp;
-    }
-
-    // #region getters
+    // #region getter functions
     /**
      * @notice Exprimental function for testing purposes
      */
@@ -77,7 +61,7 @@ contract Aside0x01 is AsideChainlink {
     }
 
     /**
-     * @notice Returns the last AI sentiment fetched through Chainlink Functions and its timestamp.
+     * @notice Returns the last AI sentiment fetched through Chainlink Functions.
      * @return sentiment The last AI sentiment fetched through Chainlink Functions.
      * @return timestamp The timestamp of the last AI sentiment fetched through Chainlink Functions.
      */
@@ -95,6 +79,24 @@ contract Aside0x01 is AsideChainlink {
         _requireOwned(tokenId);
 
         return _sentiments[tokenId];
+    }
+    // #endregion
+
+    // #region internal Chainlink functions
+    /**
+     * @notice Callback function for fulfilling a Chainlink Functions request.
+     * @param requestId The id of the request to fulfill.
+     * @param response The HTTP response data.
+     * @param err Any errors from the Chainlink Functions request.
+     */
+    function fulfillRequest(bytes32 requestId, bytes memory response, bytes memory err)
+        internal
+        override
+        onlyValidRequestId(requestId)
+        onlyValidCallback(err)
+    {
+        _lastSentiment = uint256(bytes32(response));
+        _lastSentimentTimestamp = block.timestamp;
     }
     // #endregion
 
