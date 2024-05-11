@@ -163,9 +163,11 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
     }
     // #endregion
 
-    // #region internal / private functions
+    // #region internal hook functions
     function _afterUpdate(bytes32, /*requestId*/ string[] memory /*args*/ ) internal virtual {}
+    // #endregion
 
+    // #region private functions
     function _setDonId(bytes32 donId_) private {
         if (donId_ == bytes32(0)) revert InvalidDonId();
 
