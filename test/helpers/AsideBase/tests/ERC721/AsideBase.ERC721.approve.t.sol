@@ -5,7 +5,7 @@ import {AsideBaseTestHelper, IERC721Errors} from "../../AsideBaseTestHelper.t.so
 
 abstract contract Approve is AsideBaseTestHelper {
     function test_approve_FromOwner() public mint {
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(address(baseToken));
         emit Approval(owner, approved, tokenId);
         vm.prank(owner);
         baseToken.approve(approved, tokenId);
@@ -17,7 +17,7 @@ abstract contract Approve is AsideBaseTestHelper {
         vm.prank(owner);
         baseToken.setApprovalForAll(operator, true);
 
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(address(baseToken));
         emit Approval(owner, approved, tokenId);
         vm.prank(operator);
         baseToken.approve(approved, tokenId);
