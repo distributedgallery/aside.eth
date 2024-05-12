@@ -17,6 +17,7 @@ contract Aside0x01 is AsideChainlink {
      * @param admin_ The address to set as the DEFAULT_ADMIN of this contract.
      * @param minter_ The address to set as the MINTER of this contract.
      * @param updater_ The address to set as the UPDATER of this contract.
+     * @param verse_ The address of Verse's custodial wallet.
      * @param timelock_ The duration of the timelock upon which all tokens are automatically unlocked.
      * @param router_ The address of the Chainlink Functions router.
      * @param donId_ The id of the Chainlink Functions DON.
@@ -29,6 +30,7 @@ contract Aside0x01 is AsideChainlink {
         address admin_,
         address minter_,
         address updater_,
+        address verse_,
         uint256 timelock_,
         address router_,
         bytes32 donId_,
@@ -43,6 +45,7 @@ contract Aside0x01 is AsideChainlink {
             admin_,
             minter_,
             updater_,
+            verse_,
             timelock_,
             router_,
             donId_,

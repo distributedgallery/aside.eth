@@ -44,10 +44,19 @@ abstract contract TransferFrom is AsideBaseTestHelper {
         assertEq(baseToken.balanceOf(owner), 0);
     }
 
+    function test_transferFrom_ForLockedTokenOwnedByVerse() public {
+        _mint(verse);
+        vm.prank(verse);
+        baseToken.transferFrom(verse, recipient, tokenId);
+
+        assertEq(baseToken.ownerOf(tokenId), recipient);
+        assertEq(baseToken.balanceOf(recipient), 1);
+        assertEq(baseToken.balanceOf(verse), 0);
+    }
+
     function test_RevertWhen_transferFrom_ForNonexistentToken() public {
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, tokenId));
-        vm.prank(owner);
-        baseToken.transferFrom(owner, recipient, tokenId);
+        baseToken.transferFrom(address(0), recipient, tokenId);
     }
 
     function test_RevertWhen_transferFrom_FromWrongOwner() public mint unlock {

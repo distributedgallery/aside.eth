@@ -13,7 +13,7 @@ import {
 abstract contract SafeTransferFrom is AsideBaseTestHelper {
     // #region EOA
     function test_safeTransferFrom_ToEOA_FromOwner() public mint unlock {
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(address(baseToken));
         emit Transfer(owner, recipient, tokenId);
         vm.prank(owner);
         baseToken.safeTransferFrom(owner, recipient, tokenId);
@@ -27,7 +27,7 @@ abstract contract SafeTransferFrom is AsideBaseTestHelper {
         vm.prank(owner);
         baseToken.approve(approved, tokenId);
 
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(address(baseToken));
         emit Transfer(owner, recipient, tokenId);
         vm.prank(approved);
         baseToken.safeTransferFrom(owner, recipient, tokenId);
@@ -42,7 +42,7 @@ abstract contract SafeTransferFrom is AsideBaseTestHelper {
         vm.prank(owner);
         baseToken.setApprovalForAll(operator, true);
 
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(address(baseToken));
         emit Transfer(owner, recipient, tokenId);
         vm.prank(operator);
         baseToken.safeTransferFrom(owner, recipient, tokenId);
@@ -50,6 +50,16 @@ abstract contract SafeTransferFrom is AsideBaseTestHelper {
         assertEq(baseToken.ownerOf(tokenId), recipient);
         assertEq(baseToken.balanceOf(recipient), 1);
         assertEq(baseToken.balanceOf(owner), 0);
+    }
+
+    function test_safeTransferFrom_ForLockedTokenOwnedByVerse() public {
+        _mint(verse);
+        vm.prank(verse);
+        baseToken.safeTransferFrom(verse, recipient, tokenId);
+
+        assertEq(baseToken.ownerOf(tokenId), recipient);
+        assertEq(baseToken.balanceOf(recipient), 1);
+        assertEq(baseToken.balanceOf(verse), 0);
     }
     // #endregion
 
@@ -60,7 +70,7 @@ abstract contract SafeTransferFrom is AsideBaseTestHelper {
         vm.prank(owner);
         baseToken.setApprovalForAll(address(this), true);
 
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(address(baseToken));
         emit Transfer(owner, address(to), tokenId);
         baseToken.safeTransferFrom(owner, address(to), tokenId);
 
@@ -80,7 +90,7 @@ abstract contract SafeTransferFrom is AsideBaseTestHelper {
         vm.prank(owner);
         baseToken.setApprovalForAll(address(this), true);
 
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(address(baseToken));
         emit Transfer(owner, address(to), tokenId);
         baseToken.safeTransferFrom(owner, address(to), tokenId, "thisisdata");
 
@@ -128,14 +138,14 @@ abstract contract SafeTransferFrom is AsideBaseTestHelper {
     // #endregion
 
     // #region ERC721RecipientWithWrongReturnData
-    function test_RevertWhen_safeTransferFrom_ToERC721RecipientWithWrongReturnData_WithoutData() public mint unlock {
+    function test_RevertWhen_safeTransferFrom_ToWrongReturnDataERC721Recipient_WithoutData() public mint unlock {
         address to = address(new WrongReturnDataERC721Recipient());
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidReceiver.selector, to));
         vm.prank(owner);
         baseToken.safeTransferFrom(owner, to, tokenId);
     }
 
-    function test_RevertWhen_safeTransferFrom_ToERC721RecipientWithWrongReturnData_WithData() public mint unlock {
+    function test_RevertWhen_safeTransferFrom_ToWrongReturnDataERC721Recipient_WithData() public mint unlock {
         address to = address(new WrongReturnDataERC721Recipient());
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidReceiver.selector, to));
         vm.prank(owner);
@@ -146,8 +156,7 @@ abstract contract SafeTransferFrom is AsideBaseTestHelper {
     // #region generic errors
     function test_RevertWhen_safeTransferFrom_ForNonexistentToken() public {
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, tokenId));
-        vm.prank(owner);
-        baseToken.safeTransferFrom(owner, recipient, tokenId);
+        baseToken.safeTransferFrom(address(0), recipient, tokenId);
     }
 
     function test_RevertWhen_safeTransferFrom_FromWrongOwner() public mint unlock {

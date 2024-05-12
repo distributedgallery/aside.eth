@@ -10,6 +10,7 @@ contract Aside0x01Deploy is Script {
         address admin,
         address minter,
         address unlocker,
+        address verse,
         uint256 timelock,
         address router,
         bytes32 donId,
@@ -18,7 +19,7 @@ contract Aside0x01Deploy is Script {
         string memory source
     ) external {
         vm.startBroadcast();
-        new Aside0x01(baseUri, admin, minter, unlocker, timelock, router, donId, subscriptionId, callbackGasLimit, source);
+        new Aside0x01(baseUri, admin, minter, unlocker, verse, timelock, router, donId, subscriptionId, callbackGasLimit, source);
         vm.stopBroadcast();
     }
 }

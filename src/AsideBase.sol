@@ -15,6 +15,7 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
     event EmergencyUnlock();
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    address public immutable VERSE;
     uint256 public immutable TIMELOCK_DEADLINE;
     string public BASE_URI; // strings cannot be immutable
     bool private _eUnlocked = false; // emergency unlock
@@ -27,14 +28,22 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
      * @param baseURI_ The base URI of the token.
      * @param admin_ The address to set as the DEFAULT_ADMIN of this contract.
      * @param minter_ The address to set as the MINTER of this contract.
+     * @param verse_ The address of Verse's custodial wallet.
      * @param timelock_ The duration of the timelock upon which all tokens are automatically unlocked.
      */
-    constructor(string memory name_, string memory symbol_, string memory baseURI_, address admin_, address minter_, uint256 timelock_)
-        ERC721(name_, symbol_)
-    {
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        string memory baseURI_,
+        address admin_,
+        address minter_,
+        address verse_,
+        uint256 timelock_
+    ) ERC721(name_, symbol_) {
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
         _grantRole(MINTER_ROLE, minter_);
         BASE_URI = baseURI_;
+        VERSE = verse_;
         TIMELOCK_DEADLINE = block.timestamp + timelock_;
     }
 
@@ -140,7 +149,8 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
 
     // #region internal hook functions
     function _update(address to, uint256 tokenId, address auth) internal override(ERC721) returns (address) {
-        if (!_isUnlocked(tokenId) && _ownerOf(tokenId) != address(0)) revert TokenLocked(tokenId);
+        address owner = _ownerOf(tokenId);
+        if (!_isUnlocked(tokenId) && owner != address(0) && owner != VERSE) revert TokenLocked(tokenId);
         return super._update(to, tokenId, auth);
     }
 

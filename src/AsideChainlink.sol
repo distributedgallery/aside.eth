@@ -41,6 +41,7 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
      * @param admin_ The address to set as the DEFAULT_ADMIN of this contract.
      * @param minter_ The address to set as the MINTER of this contract.
      * @param updater_ The address to set as the UPDATER of this contract.
+     * @param verse_ The address of Verse's custodial wallet.
      * @param timelock_ The duration of the timelock upon which all tokens are automatically unlocked.
      * @param router_ The address of the Chainlink Functions router.
      * @param donId_ The id of the Chainlink Functions DON.
@@ -55,13 +56,14 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
         address admin_,
         address minter_,
         address updater_,
+        address verse_,
         uint256 timelock_,
         address router_,
         bytes32 donId_,
         uint64 subscriptionId_,
         uint32 callbackGasLimit_,
         string memory source_
-    ) AsideBase(name_, symbol_, baseURI_, admin_, minter_, timelock_) FunctionsClient(router_) {
+    ) AsideBase(name_, symbol_, baseURI_, admin_, minter_, verse_, timelock_) FunctionsClient(router_) {
         _grantRole(UPDATER_ROLE, updater_);
         _setDonId(donId_);
         _setSubscriptionId(subscriptionId_);
