@@ -83,7 +83,23 @@ abstract contract TransferFrom is AsideBaseTestHelper {
     }
 
     function test_RevertWhen_transferFrom_ForLockedToken() public mint {
+        // owner
         vm.expectRevert(abi.encodeWithSelector(AsideBase.TokenLocked.selector, tokenId));
+        vm.prank(owner);
+        baseToken.transferFrom(owner, recipient, tokenId);
+
+        // approved
+        vm.prank(owner);
+        baseToken.approve(approved, tokenId);
+        vm.expectRevert(abi.encodeWithSelector(AsideBase.TokenLocked.selector, tokenId));
+        vm.prank(approved);
+        baseToken.transferFrom(owner, recipient, tokenId);
+
+        // operator
+        vm.prank(owner);
+        baseToken.setApprovalForAll(operator, true);
+        vm.expectRevert(abi.encodeWithSelector(AsideBase.TokenLocked.selector, tokenId));
+        vm.prank(operator);
         baseToken.transferFrom(owner, recipient, tokenId);
     }
 }

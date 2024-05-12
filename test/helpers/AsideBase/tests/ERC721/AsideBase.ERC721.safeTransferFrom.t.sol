@@ -183,8 +183,23 @@ abstract contract SafeTransferFrom is AsideBaseTestHelper {
     }
 
     function test_RevertWhen_safeTransferFrom_ForLockedToken() public mint {
+        // owner
         vm.expectRevert(abi.encodeWithSelector(AsideBase.TokenLocked.selector, tokenId));
         vm.prank(owner);
+        baseToken.safeTransferFrom(owner, recipient, tokenId);
+
+        // approved
+        vm.prank(owner);
+        baseToken.approve(approved, tokenId);
+        vm.expectRevert(abi.encodeWithSelector(AsideBase.TokenLocked.selector, tokenId));
+        vm.prank(approved);
+        baseToken.safeTransferFrom(owner, recipient, tokenId);
+
+        // operator
+        vm.prank(owner);
+        baseToken.setApprovalForAll(operator, true);
+        vm.expectRevert(abi.encodeWithSelector(AsideBase.TokenLocked.selector, tokenId));
+        vm.prank(operator);
         baseToken.safeTransferFrom(owner, recipient, tokenId);
     }
     // #endregion
