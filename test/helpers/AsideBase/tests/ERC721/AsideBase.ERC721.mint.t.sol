@@ -65,10 +65,6 @@ abstract contract Mint is AsideBaseTestHelper {
             abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, address(this), baseToken.MINTER_ROLE())
         );
         baseToken.mint(owner, tokenId);
-        vm.expectRevert(
-            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, address(this), baseToken.MINTER_ROLE())
-        );
-        baseToken.mint(owner, tokenId, "");
     }
 
     function test_RevertWhen_mint_ToZeroAddress() public {

@@ -1,39 +1,17 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.25;
 
-import {AsideChainlink, AsideBase, Aside0x01TestHelper, AsideBaseTestHelper} from "./Aside0x01TestHelper.t.sol";
+import {AsideChainlink, AsideBase, Aside0x01TestHelper} from "./Aside0x01TestHelper.t.sol";
 import {AsideBaseTest} from "../helpers/AsideBase/tests/AsideBase.t.sol";
 
 contract Aside0x01BaseTest is Aside0x01TestHelper, AsideBaseTest {
-    // #region required overrides
-    function _mint() internal override(Aside0x01TestHelper, AsideBaseTestHelper) {
-        super._mint();
-    }
+    // #region unlock
+    function test_unlock() public mint setUpUnlockConditions {
+        vm.expectEmit(address(baseToken));
+        emit AsideBase.Unlock(tokenId);
+        baseToken.unlock(_tokenIds());
 
-    function _mint(address to) internal override(Aside0x01TestHelper, AsideBaseTestHelper) {
-        super._mint(to);
-    }
-
-    function _setUpUnlockConditions() internal override(Aside0x01TestHelper, AsideBaseTestHelper) {
-        super._setUpUnlockConditions();
-    }
-    // #endregion
-
-    // #region mint
-    function test_mint() public mint {
-        assertEq(token.sentimentOf(tokenId), sentiment);
-    }
-
-    function test_mint_WithoutPayload() public {
-        vm.prank(minter);
-        baseToken.mint(owner, tokenId);
-        assertEq(token.sentimentOf(tokenId), 0);
-    }
-
-    function test_RevertWhen_mint_WithInvalidPayload() public {
-        vm.expectRevert(abi.encodeWithSelector(AsideBase.InvalidPayload.selector, abi.encodePacked(uint256(101))));
-        vm.prank(minter);
-        baseToken.mint(owner, 1, abi.encodePacked(uint256(101)));
+        assertTrue(baseToken.isUnlocked(tokenId));
     }
     // #endregion
 
@@ -41,6 +19,28 @@ contract Aside0x01BaseTest is Aside0x01TestHelper, AsideBaseTest {
     function test_isUnlocked_WhenRegularUnlockHasBeenTriggered() public mint setUpUnlockConditions {
         token.unlock(_tokenIds());
         assertTrue(token.isUnlocked(tokenId));
+    }
+    // #endregion
+
+    // #region mint
+    function test_mint_RegularTokensAreLocked() public mint {
+        uint256 NB_OF_TOKENS = token.NB_OF_TOKENS();
+        vm.prank(minter);
+        token.mint(owner, NB_OF_TOKENS - 1);
+
+        assertFalse(token.isUnlocked(tokenId));
+        assertFalse(token.isUnlocked(NB_OF_TOKENS - 1));
+    }
+
+    function test_mint_UnlockAPTokensAreUnlocked() public {
+        uint256 NB_OF_TOKENS = token.NB_OF_TOKENS();
+        vm.startPrank(minter);
+        token.mint(owner, NB_OF_TOKENS);
+        token.mint(owner, NB_OF_TOKENS + 1);
+        vm.stopPrank();
+
+        assertTrue(token.isUnlocked(NB_OF_TOKENS));
+        assertTrue(token.isUnlocked(NB_OF_TOKENS + 1));
     }
     // #endregion
 

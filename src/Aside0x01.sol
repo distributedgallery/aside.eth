@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.25;
 
-import {AsideChainlink, AsideBase} from "./AsideChainlink.sol";
+import {AsideChainlink} from "./AsideChainlink.sol";
 
 contract Aside0x01 is AsideChainlink {
-    uint256 public constant SENTIMENT_UNIT = 100;
     uint256 public constant SENTIMENT_INTERVAL = 10;
+    uint256 public constant NB_OF_TOKENS = 100;
 
     uint256 private _lastSentiment;
     uint256 private _lastSentimentTimestamp;
-    mapping(uint256 => uint256) private _sentiments; // tokenId => sentiment
 
     /**
      * @notice Creates a new Aside0x01 contract.
@@ -57,13 +56,6 @@ contract Aside0x01 is AsideChainlink {
 
     // #region getter functions
     /**
-     * @notice Exprimental function for testing purposes
-     */
-    function fromBytes(bytes memory b) public pure returns (uint256) {
-        return uint256(bytes32(b));
-    }
-
-    /**
      * @notice Returns the last AI sentiment fetched through Chainlink Functions.
      * @return sentiment The last AI sentiment fetched through Chainlink Functions.
      * @return timestamp The timestamp of the last AI sentiment fetched through Chainlink Functions.
@@ -81,7 +73,7 @@ contract Aside0x01 is AsideChainlink {
     function sentimentOf(uint256 tokenId) public view returns (uint256) {
         _requireOwned(tokenId);
 
-        return _sentiments[tokenId];
+        return _sentimentOf(tokenId);
     }
     // #endregion
 
@@ -105,17 +97,14 @@ contract Aside0x01 is AsideChainlink {
 
     // #region internal hook functions
     /**
-     * @dev The payload must be a bytes encoded uint256 in the [0, 100] range.
+     * @dev Unlocks AP tokens automatically at minting time.
      */
-    function _afterMint(address to, uint256 tokenId, bytes memory payload) internal override(AsideBase) {
-        uint256 sentiment = uint256(bytes32(payload));
-        if (sentiment > SENTIMENT_UNIT) revert InvalidPayload(payload);
-        _sentiments[tokenId] = sentiment;
-
-        super._afterMint(to, tokenId, payload);
+    function _afterMint(address to, uint256 tokenId) internal virtual override {
+        if (tokenId >= NB_OF_TOKENS) _unlock(tokenId);
+        super._afterMint(to, tokenId);
     }
 
-    function _beforeUnlock(uint256[] memory tokenIds) internal override(AsideBase) {
+    function _beforeUnlock(uint256[] memory tokenIds) internal override {
         super._beforeUnlock(tokenIds);
 
         if (block.timestamp > _lastSentimentTimestamp + 1 hours) revert DeprecatedData();
@@ -124,11 +113,18 @@ contract Aside0x01 is AsideChainlink {
         for (uint256 i = 0; i < length; i++) {
             uint256 tokenId = tokenIds[i];
             uint256 current = _lastSentiment;
-            uint256 expected = _sentiments[tokenId];
+            uint256 expected = _sentimentOf(tokenId);
             if (current < expected || current >= expected + SENTIMENT_INTERVAL) {
                 revert InvalidUnlock(tokenId);
             }
         }
+    }
+    // #endregion
+
+    // #region private functions
+    function _sentimentOf(uint256 tokenId) private pure returns (uint256) {
+        if (tokenId < NB_OF_TOKENS) return tokenId - (tokenId % 10);
+        else return 0;
     }
     // #endregion
 }

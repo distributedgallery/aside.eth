@@ -15,20 +15,14 @@ import {Aside0x01} from "../../src/Aside0x01.sol";
 
 abstract contract Aside0x01TestHelper is AsideChainlinkTestHelper {
     Aside0x01 public token;
-    uint256 public sentiment = 60;
-    bytes public payload = abi.encodePacked(sentiment);
+    uint256 public sentiment = 10;
 
-    function _mint() internal virtual override(AsideBaseTestHelper) {
-        vm.prank(minter);
-        token.mint(owner, tokenId, payload);
+    modifier setUpUnlockConditions() {
+        _setUpUnlockConditions();
+        _;
     }
 
-    function _mint(address to) internal virtual override(AsideBaseTestHelper) {
-        vm.prank(minter);
-        token.mint(to, tokenId, payload);
-    }
-
-    function _setUpUnlockConditions() internal virtual override(AsideBaseTestHelper) {
+    function _setUpUnlockConditions() internal {
         _update();
         router.fulfillRequest(token, abi.encodePacked(sentiment), "");
     }

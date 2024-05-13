@@ -22,22 +22,17 @@ abstract contract AsideBaseTestHelper is Test {
     address public constant recipient = address(0x04);
     address public constant verse = address(0x5);
     uint256 public constant timelock = 365 days;
-    uint256 public constant tokenId = 1;
+    uint256 public constant tokenId = 12;
     string public constant baseURI = "ipfs://bafybeicy53j7e2er5kmft4rzj7ijr2cljgxxitnmmqztrdfst4i5z4pa74/";
-    string public constant tokenURI = "ipfs://bafybeicy53j7e2er5kmft4rzj7ijr2cljgxxitnmmqztrdfst4i5z4pa74/1";
-
-    modifier unlock() {
-        _reachTimelockDeadline();
-        _;
-    }
+    string public constant tokenURI = "ipfs://bafybeicy53j7e2er5kmft4rzj7ijr2cljgxxitnmmqztrdfst4i5z4pa74/12";
 
     modifier mint() {
         _mint();
         _;
     }
 
-    modifier setUpUnlockConditions() {
-        _setUpUnlockConditions();
+    modifier unlock() {
+        _reachTimelockDeadline();
         _;
     }
 
@@ -55,9 +50,13 @@ abstract contract AsideBaseTestHelper is Test {
         vm.warp(baseToken.TIMELOCK_DEADLINE());
     }
 
-    function _setUpUnlockConditions() internal virtual {}
+    function _mint() internal {
+        vm.prank(minter);
+        baseToken.mint(owner, tokenId);
+    }
 
-    function _mint() internal virtual {}
-
-    function _mint(address to) internal virtual {}
+    function _mint(address to) internal {
+        vm.prank(minter);
+        baseToken.mint(to, tokenId);
+    }
 }

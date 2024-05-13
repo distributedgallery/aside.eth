@@ -8,7 +8,6 @@ import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
     error TokenLocked(uint256 tokenId);
     error TokenAlreadyUnlocked(uint256 tokenId);
-    error InvalidPayload(bytes payload);
     error InvalidUnlock(uint256 tokenId);
 
     event Unlock(uint256 indexed tokenId);
@@ -54,18 +53,7 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
      */
     function mint(address to, uint256 tokenId) external onlyRole(MINTER_ROLE) {
         _safeMint(to, tokenId);
-        _afterMint(to, tokenId, "");
-    }
-
-    /**
-     * @notice Mints `tokenId`, transfers it to `to` and checks for `to` acceptance.
-     * @param to The address to receive the token to be minted.
-     * @param tokenId The id of the token to be minted.
-     * @param payload The payload to be used for the token to be minted.
-     */
-    function mint(address to, uint256 tokenId, bytes memory payload) external onlyRole(MINTER_ROLE) {
-        _safeMint(to, tokenId);
-        _afterMint(to, tokenId, payload);
+        _afterMint(to, tokenId);
     }
 
     /**
@@ -78,9 +66,7 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
         _beforeUnlock(tokenIds);
         uint256 length = tokenIds.length;
         for (uint256 i = 0; i < length; i++) {
-            uint256 tokenId = tokenIds[i];
-            _unlocks[tokenId] = true;
-            emit Unlock(tokenId);
+            _unlock(tokenIds[i]);
         }
     }
 
@@ -128,7 +114,7 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
     }
     // #endregion
 
-    // #region internal view functions
+    // #region internal functions
     function _baseURI() internal view override returns (string memory) {
         return BASE_URI;
     }
@@ -145,6 +131,11 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
         _requireOwned(tokenId);
         if (_isUnlocked(tokenId)) revert TokenAlreadyUnlocked(tokenId);
     }
+
+    function _unlock(uint256 tokenId) internal {
+        _unlocks[tokenId] = true;
+        emit Unlock(tokenId);
+    }
     // #endregion
 
     // #region internal hook functions
@@ -154,7 +145,7 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
         return super._update(to, tokenId, auth);
     }
 
-    function _afterMint(address, uint256, bytes memory) internal virtual {}
+    function _afterMint(address, uint256) internal virtual {}
 
     function _beforeUnlock(uint256[] memory tokenIds) internal virtual {
         uint256 length = tokenIds.length;
