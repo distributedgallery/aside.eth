@@ -4,6 +4,33 @@ pragma solidity ^0.8.25;
 import {AsideBase, AsideBaseTestHelper, IERC721Errors} from "../../AsideBaseTestHelper.t.sol";
 
 abstract contract TransferFrom is AsideBaseTestHelper {
+    function test_transferFrom_AfterTimelock() public mint {
+        vm.warp(baseToken.TIMELOCK_DEADLINE());
+
+        vm.expectEmit(true, true, true, true);
+        emit Transfer(owner, recipient, tokenId);
+        vm.prank(owner);
+        baseToken.transferFrom(owner, recipient, tokenId);
+
+        assertEq(baseToken.ownerOf(tokenId), recipient);
+        assertEq(baseToken.balanceOf(recipient), 1);
+        assertEq(baseToken.balanceOf(owner), 0);
+    }
+
+    function test_transferFrom_AfterEmergencyUnlock() public mint {
+        vm.prank(admin);
+        baseToken.eUnlock();
+
+        vm.expectEmit(true, true, true, true);
+        emit Transfer(owner, recipient, tokenId);
+        vm.prank(owner);
+        baseToken.transferFrom(owner, recipient, tokenId);
+
+        assertEq(baseToken.ownerOf(tokenId), recipient);
+        assertEq(baseToken.balanceOf(recipient), 1);
+        assertEq(baseToken.balanceOf(owner), 0);
+    }
+
     function test_transferFrom_FromOwner() public mint unlock {
         vm.expectEmit(true, true, true, true);
         emit Transfer(owner, recipient, tokenId);
@@ -52,6 +79,11 @@ abstract contract TransferFrom is AsideBaseTestHelper {
         assertEq(baseToken.ownerOf(tokenId), recipient);
         assertEq(baseToken.balanceOf(recipient), 1);
         assertEq(baseToken.balanceOf(verse), 0);
+        assertFalse(baseToken.isUnlocked(tokenId));
+
+        vm.expectRevert(abi.encodeWithSelector(AsideBase.TokenLocked.selector, tokenId));
+        vm.prank(recipient);
+        baseToken.safeTransferFrom(verse, recipient, tokenId);
     }
 
     function test_RevertWhen_transferFrom_ForNonexistentToken() public {

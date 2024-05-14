@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.25;
 
-import {AsideChainlink, AsideBase, Aside0x01TestHelper, FunctionsClient} from "./Aside0x01TestHelper.t.sol";
+import {AsideChainlink, Aside0x01TestHelper, FunctionsClient} from "./Aside0x01TestHelper.t.sol";
 
 contract FulfillRequest is Aside0x01TestHelper {
     function test_fulfillRequest() public update {

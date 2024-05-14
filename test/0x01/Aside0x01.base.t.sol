@@ -20,6 +20,21 @@ contract Aside0x01BaseTest is Aside0x01TestHelper, AsideBaseTest {
         token.unlock(_tokenIds());
         assertTrue(token.isUnlocked(tokenId));
     }
+
+    function test_isUnlocked_WhenTokenHasBeenBurntAndReminted() public mint setUpUnlockConditions {
+        token.unlock(_tokenIds());
+        vm.prank(owner);
+        baseToken.burn(tokenId);
+        _mint();
+        assertFalse(baseToken.isUnlocked(tokenId));
+    }
+
+    function test_isUnlocked_WhenTokenHasBeenUnlockedAndTransfered() public mint setUpUnlockConditions {
+        token.unlock(_tokenIds());
+        vm.prank(owner);
+        baseToken.transferFrom(owner, recipient, tokenId);
+        assertTrue(baseToken.isUnlocked(tokenId));
+    }
     // #endregion
 
     // #region mint

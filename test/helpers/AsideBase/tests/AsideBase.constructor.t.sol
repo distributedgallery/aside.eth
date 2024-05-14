@@ -8,6 +8,7 @@ abstract contract Constructor is AsideBaseTestHelper {
         assertTrue(baseToken.hasRole(baseToken.DEFAULT_ADMIN_ROLE(), admin));
         assertTrue(baseToken.hasRole(baseToken.MINTER_ROLE(), minter));
         assertEq(baseToken.BASE_URI(), baseURI);
+        assertEq(baseToken.VERSE(), verse);
         assertEq(baseToken.TIMELOCK_DEADLINE(), block.timestamp + timelock);
     }
 }

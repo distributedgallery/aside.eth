@@ -30,4 +30,11 @@ contract SentimentOf is Aside0x01TestHelper {
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, tokenId));
         token.sentimentOf(tokenId);
     }
+
+    function test_RevertWhen_sentimentOf_ForBurntToken() public mint unlock {
+        vm.prank(owner);
+        token.burn(tokenId);
+        vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, tokenId));
+        token.sentimentOf(tokenId);
+    }
 }

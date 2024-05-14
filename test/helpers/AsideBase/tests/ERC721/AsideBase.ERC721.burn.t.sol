@@ -13,6 +13,8 @@ abstract contract Burn is AsideBaseTestHelper {
         assertEq(baseToken.balanceOf(owner), 0);
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, tokenId));
         baseToken.ownerOf(tokenId);
+        vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, tokenId));
+        baseToken.isUnlocked(tokenId);
     }
 
     function test_burn_FromApproved() public mint unlock {
@@ -29,6 +31,8 @@ abstract contract Burn is AsideBaseTestHelper {
         baseToken.getApproved(tokenId);
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, tokenId));
         baseToken.ownerOf(tokenId);
+        vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, tokenId));
+        baseToken.isUnlocked(tokenId);
     }
 
     function test_burn_FromOperator() public mint unlock {
@@ -43,6 +47,8 @@ abstract contract Burn is AsideBaseTestHelper {
         assertEq(baseToken.balanceOf(owner), 0);
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, tokenId));
         baseToken.ownerOf(tokenId);
+        vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721NonexistentToken.selector, tokenId));
+        baseToken.isUnlocked(tokenId);
     }
 
     function test_RevertWhen_burn_FromUnauthorized() public mint unlock {

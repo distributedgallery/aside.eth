@@ -60,6 +60,11 @@ abstract contract SafeTransferFrom is AsideBaseTestHelper {
         assertEq(baseToken.ownerOf(tokenId), recipient);
         assertEq(baseToken.balanceOf(recipient), 1);
         assertEq(baseToken.balanceOf(verse), 0);
+        assertFalse(baseToken.isUnlocked(tokenId));
+
+        vm.expectRevert(abi.encodeWithSelector(AsideBase.TokenLocked.selector, tokenId));
+        vm.prank(recipient);
+        baseToken.safeTransferFrom(verse, recipient, tokenId);
     }
     // #endregion
 

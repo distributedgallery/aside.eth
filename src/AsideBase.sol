@@ -139,14 +139,10 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
     // #endregion
 
     // #region internal hook functions
-    /**
-     * @dev We do not reinitialize the unlock state of a token when it is burned because:
-     * - It saves gas on every transfer.
-     * - Minting is permissioned and won't allow the re-minting of a burnt token anyhow.
-     */
     function _update(address to, uint256 tokenId, address auth) internal override(ERC721) returns (address) {
         address owner = _ownerOf(tokenId);
         if (!_isUnlocked(tokenId) && owner != address(0) && owner != VERSE) revert TokenLocked(tokenId);
+        if (to == address(0)) _unlocks[tokenId] = false;
         return super._update(to, tokenId, auth);
     }
 
