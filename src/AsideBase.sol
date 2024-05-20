@@ -9,6 +9,7 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
     error TokenLocked(uint256 tokenId);
     error TokenAlreadyUnlocked(uint256 tokenId);
     error InvalidUnlock(uint256 tokenId);
+    error InvalidParametersMatch();
 
     event Unlock(uint256 indexed tokenId);
     event EmergencyUnlock();
@@ -54,6 +55,23 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
     function mint(address to, uint256 tokenId) external onlyRole(MINTER_ROLE) {
         _safeMint(to, tokenId);
         _afterMint(to, tokenId);
+    }
+
+    /**
+     * @notice Mints `tokenIds`, transfers them to `to` and checks for `to` acceptance.
+     * @param to The addresses to receive the tokens to be minted.
+     * @param tokenIds The ids of the tokens to be minted.
+     */
+    function mintBatch(address[] memory to, uint256[] memory tokenIds) external onlyRole(MINTER_ROLE) {
+        uint256 length = to.length;
+        if (length != tokenIds.length) revert InvalidParametersMatch();
+
+        for (uint256 i = 0; i < length; i++) {
+            address recipient = to[i];
+            uint256 tokenId = tokenIds[i];
+            _safeMint(recipient, tokenId);
+            _afterMint(recipient, tokenId);
+        }
     }
 
     /**

@@ -100,7 +100,7 @@ contract Aside0x01 is AsideChainlink {
      * @dev Unlocks AP tokens automatically at minting time.
      */
     function _afterMint(address to, uint256 tokenId) internal virtual override {
-        if (tokenId >= NB_OF_TOKENS) _unlock(tokenId);
+        if (tokenId >= NB_OF_TOKENS + 2) _unlock(tokenId);
         super._afterMint(to, tokenId);
     }
 
@@ -124,6 +124,8 @@ contract Aside0x01 is AsideChainlink {
     // #region private functions
     function _sentimentOf(uint256 tokenId) private pure returns (uint256) {
         if (tokenId < NB_OF_TOKENS) return tokenId - (tokenId % 10);
+        if (tokenId == 100) return 70;
+        if (tokenId == 101) return 60;
         else return 0;
     }
     // #endregion
