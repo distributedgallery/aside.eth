@@ -38,8 +38,8 @@ contract Aside0x01 is AsideChainlink {
         string memory source_
     )
         AsideChainlink(
-            "Aside0x01",
-            "ASD0x01",
+            "AI Index",
+            "AI-Index",
             baseURI_,
             admin_,
             minter_,

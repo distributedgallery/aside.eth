@@ -6,7 +6,7 @@ import {AsideBaseERC721Test} from "../helpers/AsideBase/tests/ERC721/AsideBase.E
 
 contract Aside0x01BaseERC721Test is Aside0x01TestHelper, AsideBaseERC721Test {
     function test_metadata() public {
-        assertEq(baseToken.name(), "Aside0x01");
-        assertEq(baseToken.symbol(), "ASD0x01");
+        assertEq(baseToken.name(), "AI Index");
+        assertEq(baseToken.symbol(), "AI-Index");
     }
 }
