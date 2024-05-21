@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.25;
 
 import "forge-std/Script.sol";
 import {Aside0x01} from "../src/Aside0x01.sol";
@@ -9,7 +9,7 @@ contract Aside0x01Deploy is Script {
         string memory baseUri,
         address admin,
         address minter,
-        address unlocker,
+        address updater,
         address verse,
         uint256 timelock,
         address router,
@@ -19,7 +19,7 @@ contract Aside0x01Deploy is Script {
         string memory source
     ) external {
         vm.startBroadcast();
-        new Aside0x01(baseUri, admin, minter, unlocker, verse, timelock, router, donId, subscriptionId, callbackGasLimit, source);
+        new Aside0x01(baseUri, admin, minter, updater, verse, timelock, router, donId, subscriptionId, callbackGasLimit, source);
         vm.stopBroadcast();
     }
 }
