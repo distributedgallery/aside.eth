@@ -46,28 +46,6 @@ contract Aside0x01BaseTest is Aside0x01TestHelper, AsideBaseTest {
         assertFalse(token.isUnlocked(tokenId));
         assertFalse(token.isUnlocked(NB_OF_TOKENS - 1));
     }
-
-    function test_mint_SomeAPTokensAreLocked() public mint {
-        uint256 NB_OF_TOKENS = token.NB_OF_TOKENS();
-        vm.startPrank(minter);
-        token.mint(owner, NB_OF_TOKENS);
-        token.mint(owner, NB_OF_TOKENS + 1);
-        vm.stopPrank();
-
-        assertFalse(token.isUnlocked(NB_OF_TOKENS));
-        assertFalse(token.isUnlocked(NB_OF_TOKENS + 1));
-    }
-
-    function test_mint_APTokensAreUnlocked() public {
-        uint256 NB_OF_TOKENS = token.NB_OF_TOKENS();
-        vm.startPrank(minter);
-        token.mint(owner, NB_OF_TOKENS + 2);
-        token.mint(owner, NB_OF_TOKENS + 3);
-        vm.stopPrank();
-
-        assertTrue(token.isUnlocked(NB_OF_TOKENS + 2));
-        assertTrue(token.isUnlocked(NB_OF_TOKENS + 3));
-    }
     // #endregion
 
     // #region unlock

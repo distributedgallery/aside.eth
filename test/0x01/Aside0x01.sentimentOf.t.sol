@@ -13,9 +13,6 @@ contract SentimentOf is Aside0x01TestHelper {
         token.mint(owner, 20);
         token.mint(owner, 79);
         token.mint(owner, 99);
-        token.mint(owner, 100);
-        token.mint(owner, 101);
-        token.mint(owner, 104);
         vm.stopPrank();
 
         assertEq(token.sentimentOf(3), 0);

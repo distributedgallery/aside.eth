@@ -53,8 +53,7 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
      * @param tokenId The id of the token to be minted.
      */
     function mint(address to, uint256 tokenId) external onlyRole(MINTER_ROLE) {
-        _safeMint(to, tokenId);
-        _afterMint(to, tokenId);
+        _aMint(to, tokenId);
     }
 
     /**
@@ -67,10 +66,7 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
         if (length != tokenIds.length) revert InvalidParametersMatch();
 
         for (uint256 i = 0; i < length; i++) {
-            address recipient = to[i];
-            uint256 tokenId = tokenIds[i];
-            _safeMint(recipient, tokenId);
-            _afterMint(recipient, tokenId);
+            _aMint(to[i], tokenIds[i]);
         }
     }
 
@@ -148,6 +144,11 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
     function _requireLocked(uint256 tokenId) internal view {
         _requireOwned(tokenId);
         if (_isUnlocked(tokenId)) revert TokenAlreadyUnlocked(tokenId);
+    }
+
+    function _aMint(address to, uint256 tokenId) internal {
+        _safeMint(to, tokenId);
+        _afterMint(to, tokenId);
     }
 
     function _unlock(uint256 tokenId) internal {
