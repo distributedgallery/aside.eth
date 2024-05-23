@@ -8,7 +8,7 @@ contract Aside0x01Mint is Script {
     function run(address deployed, address receiver) external {
         vm.startBroadcast();
         Aside0x01 token = Aside0x01(deployed);
-        for (uint256 i = 0; i < 110; i++) {
+        for (uint256 i = 0; i < 100; i++) {
             token.mint(receiver, i);
         }
         vm.stopBroadcast();
