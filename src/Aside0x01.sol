@@ -5,7 +5,6 @@ import {AsideChainlink} from "./AsideChainlink.sol";
 
 contract Aside0x01 is AsideChainlink {
     uint256 public constant SENTIMENT_INTERVAL = 10;
-    uint256 public constant NB_OF_TOKENS = 100;
 
     uint256 private _lastSentiment;
     uint256 private _lastSentimentTimestamp;
@@ -41,6 +40,7 @@ contract Aside0x01 is AsideChainlink {
             "AI Index",
             "AI-Index",
             baseURI_,
+            100,
             admin_,
             minter_,
             updater_,
@@ -52,13 +52,7 @@ contract Aside0x01 is AsideChainlink {
             callbackGasLimit_,
             source_
         )
-    {
-        _aMint(0x4D3DfD28AA35869D52C5cE077Aa36E3944b48d1C, 100);
-        _aMint(0x4CD7d2004a323133330D5A62aD7C734fAfD35236, 101);
-        for (uint256 i = 102; i <= 109; i++) {
-            _aMint(admin_, i);
-        }
-    }
+    {}
 
     // #region getter functions
     /**
@@ -102,14 +96,6 @@ contract Aside0x01 is AsideChainlink {
     // #endregion
 
     // #region internal hook functions
-    /**
-     * @dev Unlocks AP tokens automatically at minting time.
-     */
-    function _afterMint(address to, uint256 tokenId) internal virtual override {
-        if (tokenId >= NB_OF_TOKENS + 2) _unlock(tokenId);
-        super._afterMint(to, tokenId);
-    }
-
     function _beforeUnlock(uint256[] memory tokenIds) internal override {
         super._beforeUnlock(tokenIds);
 
@@ -129,10 +115,7 @@ contract Aside0x01 is AsideChainlink {
 
     // #region private functions
     function _sentimentOf(uint256 tokenId) private pure returns (uint256) {
-        if (tokenId < NB_OF_TOKENS) return tokenId - (tokenId % 10);
-        if (tokenId == 100) return 70;
-        if (tokenId == 101) return 60;
-        else return 0;
+        return tokenId - (tokenId % 10);
     }
     // #endregion
 }

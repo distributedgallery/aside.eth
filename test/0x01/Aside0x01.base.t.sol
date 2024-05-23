@@ -5,6 +5,12 @@ import {AsideChainlink, AsideBase, Aside0x01TestHelper} from "./Aside0x01TestHel
 import {AsideBaseTest} from "../helpers/AsideBase/tests/AsideBase.t.sol";
 
 contract Aside0x01BaseTest is Aside0x01TestHelper, AsideBaseTest {
+    // #region NB_OF_TOKENS
+    function test_NB_OF_TOKENS() public {
+        assertEq(baseToken.NB_OF_TOKENS(), 100);
+    }
+    // #endregion
+
     // #region unlock
     function test_unlock() public mint setUpUnlockConditions {
         vm.expectEmit(address(baseToken));

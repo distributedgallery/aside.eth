@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.25;
 
-import {AsideBaseTestHelper, IAccessControl, IERC721Errors} from "../../AsideBaseTestHelper.t.sol";
+import {AsideBase, AsideBaseTestHelper, IAccessControl, IERC721Errors} from "../../AsideBaseTestHelper.t.sol";
 import {
     IERC721Receiver,
     ERC721Recipient,
@@ -53,6 +53,16 @@ abstract contract Mint is AsideBaseTestHelper {
         address to = address(new WrongReturnDataERC721Recipient());
         vm.expectRevert(abi.encodeWithSelector(IERC721Errors.ERC721InvalidReceiver.selector, to));
         _mint(to);
+    }
+
+    function test_RevertWhen_mint_WhenTokenIdIsOutOfRange() public mint unlock {
+        uint256 NB_OF_TOKENS = baseToken.NB_OF_TOKENS();
+        vm.expectRevert(abi.encodeWithSelector(AsideBase.InvalidTokenId.selector, NB_OF_TOKENS));
+        vm.prank(minter);
+        baseToken.mint(owner, NB_OF_TOKENS);
+        vm.expectRevert(abi.encodeWithSelector(AsideBase.InvalidTokenId.selector, NB_OF_TOKENS + 1));
+        vm.prank(minter);
+        baseToken.mint(owner, NB_OF_TOKENS + 1);
     }
 
     function test_RevertWhen_mint_WhenTokenIsAlreadyMinted() public mint unlock {

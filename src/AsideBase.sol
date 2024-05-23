@@ -8,6 +8,7 @@ import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
     error TokenLocked(uint256 tokenId);
     error TokenAlreadyUnlocked(uint256 tokenId);
+    error InvalidTokenId(uint256 tokenId);
     error InvalidUnlock(uint256 tokenId);
     error InvalidParametersMatch();
 
@@ -15,6 +16,7 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
     event EmergencyUnlock();
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    uint256 public immutable NB_OF_TOKENS;
     address public immutable VERSE;
     uint256 public immutable TIMELOCK_DEADLINE;
     string public BASE_URI; // strings cannot be immutable
@@ -26,6 +28,7 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
      * @param name_ The name of the token.
      * @param symbol_ The symbol of the token.
      * @param baseURI_ The base URI of the token.
+     * @param nbOfTokens_ The number of tokens allowed to be minted.
      * @param admin_ The address to set as the DEFAULT_ADMIN of this contract.
      * @param minter_ The address to set as the MINTER of this contract.
      * @param verse_ The address of Verse's custodial wallet.
@@ -35,6 +38,7 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
         string memory name_,
         string memory symbol_,
         string memory baseURI_,
+        uint256 nbOfTokens_,
         address admin_,
         address minter_,
         address verse_,
@@ -43,6 +47,7 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
         _grantRole(MINTER_ROLE, minter_);
         BASE_URI = baseURI_;
+        NB_OF_TOKENS = nbOfTokens_;
         VERSE = verse_;
         TIMELOCK_DEADLINE = block.timestamp + timelock_;
     }
@@ -165,7 +170,9 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
         return super._update(to, tokenId, auth);
     }
 
-    function _afterMint(address, uint256) internal virtual {}
+    function _afterMint(address, uint256 tokenId) internal virtual {
+        if (tokenId >= NB_OF_TOKENS) revert InvalidTokenId(tokenId);
+    }
 
     function _beforeUnlock(uint256[] memory tokenIds) internal virtual {
         uint256 length = tokenIds.length;

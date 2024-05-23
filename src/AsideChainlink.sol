@@ -38,6 +38,7 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
      * @param name_ The name of the token.
      * @param symbol_ The symbol of the token.
      * @param baseURI_ The base URI of the token.
+     * @param nbOfTokens_ The number of tokens allowed to be minted.
      * @param admin_ The address to set as the DEFAULT_ADMIN of this contract.
      * @param minter_ The address to set as the MINTER of this contract.
      * @param updater_ The address to set as the UPDATER of this contract.
@@ -53,6 +54,7 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
         string memory name_,
         string memory symbol_,
         string memory baseURI_,
+        uint256 nbOfTokens_,
         address admin_,
         address minter_,
         address updater_,
@@ -63,7 +65,7 @@ abstract contract AsideChainlink is AsideBase, FunctionsClient {
         uint64 subscriptionId_,
         uint32 callbackGasLimit_,
         string memory source_
-    ) AsideBase(name_, symbol_, baseURI_, admin_, minter_, verse_, timelock_) FunctionsClient(router_) {
+    ) AsideBase(name_, symbol_, baseURI_, nbOfTokens_, admin_, minter_, verse_, timelock_) FunctionsClient(router_) {
         _grantRole(UPDATER_ROLE, updater_);
         _setDonId(donId_);
         _setSubscriptionId(subscriptionId_);
