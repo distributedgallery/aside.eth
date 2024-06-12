@@ -15,11 +15,10 @@ contract Aside0x02 is AsideBase {
      * @param baseURI_ The base URI of the token.
      * @param admin_ The address to set as the DEFAULT_ADMIN of this contract.
      * @param minter_ The address to set as the MINTER of this contract.
-     * @param updater_ The address to set as the UPDATER of this contract.
      * @param verse_ The address of Verse's custodial wallet.
      * @param timelock_ The duration of the timelock upon which all tokens are automatically unlocked.
      */
-    constructor(string memory baseURI_, address admin_, address minter_, address updater_, address verse_, uint256 timelock_)
+    constructor(string memory baseURI_, address admin_, address minter_, address verse_, uint256 timelock_)
         AsideBase("Ray Marching the Moon", "MOON", baseURI_, 130, admin_, minter_, verse_, timelock_)
     {
         _aMint(0x4D3DfD28AA35869D52C5cE077Aa36E3944b48d1C, 120);
