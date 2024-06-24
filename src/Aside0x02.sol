@@ -4,6 +4,8 @@ pragma solidity 0.8.25;
 import {AsideBase} from "./AsideBase.sol";
 
 contract Aside0x02 is AsideBase {
+    error DisabledFunction();
+
     enum Moon {
         New,
         Full,
@@ -33,6 +35,13 @@ contract Aside0x02 is AsideBase {
         _aMint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, 129);
     }
 
+    /**
+     * @notice This function is disabled on this drop. Each token is automatically unlocked once the moon's phase it is tied to is reached.
+     */
+    function unlock(uint256[] calldata tokenIds) external pure override {
+        revert DisabledFunction();
+    }
+
     // #region getter functions
     /**
      * @notice Returns the moon associated to token `tokenId`.
@@ -47,18 +56,11 @@ contract Aside0x02 is AsideBase {
     }
     // #endregion
 
-    // #region internal hook functions
-    function _beforeUnlock(uint256[] memory tokenIds) internal override {
-        super._beforeUnlock(tokenIds);
-
-        uint256 length = tokenIds.length;
-        for (uint256 i = 0; i < length; i++) {
-            uint256 tokenId = tokenIds[i];
-            (uint256 date,) = _moonOf(tokenId);
-            if (date < block.timestamp) revert InvalidUnlock(tokenId);
-        }
+    function _isUnlocked(uint256 tokenId) internal view override returns (bool) {
+        if (_areAllUnlocked()) return true;
+        (uint256 date,) = _moonOf(tokenId);
+        return block.timestamp >= date;
     }
-    // #endregion
 
     // #region private functions
     function _moonOf(uint256 tokenId) private pure returns (uint256 date, Moon kind) {

@@ -8,6 +8,7 @@ abstract contract Aside0x02TestHelper is AsideBaseTestHelper {
     Aside0x02 public token;
 
     function setUp() public {
+        vm.warp(1_720_137_000);
         token = new Aside0x02(baseURI, admin, minter, verse, timelock);
         baseToken = AsideBase(token);
     }

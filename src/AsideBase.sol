@@ -81,7 +81,7 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
      * @dev Each tokenId in `tokenIds` must be locked.
      * @param tokenIds The ids of the tokens to unlock.
      */
-    function unlock(uint256[] calldata tokenIds) external {
+    function unlock(uint256[] calldata tokenIds) external virtual {
         _beforeUnlock(tokenIds);
         uint256 length = tokenIds.length;
         for (uint256 i = 0; i < length; i++) {
@@ -142,7 +142,7 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
         return block.timestamp >= TIMELOCK_DEADLINE || _eUnlocked;
     }
 
-    function _isUnlocked(uint256 tokenId) internal view returns (bool) {
+    function _isUnlocked(uint256 tokenId) internal view virtual returns (bool) {
         return _unlocks[tokenId] || _areAllUnlocked();
     }
 
