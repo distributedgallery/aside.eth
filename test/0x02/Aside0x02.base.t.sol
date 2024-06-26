@@ -3,11 +3,9 @@ pragma solidity ^0.8.25;
 
 import {Aside0x02, AsideBase, Aside0x02TestHelper} from "./Aside0x02TestHelper.t.sol";
 import {AsideBaseTest} from "../helpers/AsideBase/tests/AsideBase.t.sol";
-import "forge-std/console.sol";
 
 contract Aside0x02BaseTest is Aside0x02TestHelper, AsideBaseTest {
     // #region helpers
-
     function tRangeUnlocked(uint256 limit) public {
         for (uint256 i = 0; i < limit; i++) {
             assertTrue(baseToken.isUnlocked(i));
@@ -17,6 +15,7 @@ contract Aside0x02BaseTest is Aside0x02TestHelper, AsideBaseTest {
             vm.expectEmit(address(baseToken));
             emit Transfer(owner, recipient, i);
             baseToken.transferFrom(owner, recipient, i);
+            assertEq(baseToken.ownerOf(i), recipient);
         }
         for (uint256 i = limit; i < 120; i++) {
             assertFalse(baseToken.isUnlocked(i));
@@ -34,7 +33,6 @@ contract Aside0x02BaseTest is Aside0x02TestHelper, AsideBaseTest {
     // #endregion
 
     // #region unlock
-
     function test_unlock() public {
         vm.startPrank(minter);
         for (uint256 i = 0; i < 120; i++) {
@@ -141,47 +139,17 @@ contract Aside0x02BaseTest is Aside0x02TestHelper, AsideBaseTest {
         baseToken.unlock(_tokenIds());
     }
 
+    function test_isUnlocked_WhenTokenHasBeenUnlockedAndTransfered() public {
+        vm.prank(minter);
+        baseToken.mint(owner, 0);
+        vm.warp(1_720_137_600);
+        vm.prank(owner);
+        baseToken.transferFrom(owner, recipient, 0);
+        assertTrue(baseToken.isUnlocked(0));
+    }
+
     function test_RevertWhen_unlock_ForAlreadyUnlockedToken() public override {}
 
     function test_RevertWhen_unlock_ForNonexistentToken() public override {}
-    // #endregion
-
-    // #region isUnlocked
-    // function test_isUnlocked_WhenRegularUnlockHasBeenTriggered() public mint  {
-    //     token.unlock(_tokenIds());
-    //     assertTrue(token.isUnlocked(tokenId));
-    // }
-
-    // function test_isUnlocked_WhenTokenHasBeenUnlockedAndTransfered() public mint  {
-    //     token.unlock(_tokenIds());
-    //     vm.prank(owner);
-    //     baseToken.transferFrom(owner, recipient, tokenId);
-    //     assertTrue(baseToken.isUnlocked(tokenId));
-    // }
-    // #endregion
-
-    // #region mint
-    // function test_mint_RegularTokensAreLocked() public mint {
-    //     uint256 NB_OF_TOKENS = token.NB_OF_TOKENS();
-    //     vm.prank(minter);
-    //     token.mint(owner, NB_OF_TOKENS - 1);
-
-    //     assertFalse(token.isUnlocked(tokenId));
-    //     assertFalse(token.isUnlocked(NB_OF_TOKENS - 1));
-    // }
-    // #endregion
-
-    // #region unlock
-    // function test_RevertWhen_unlock_WithDeprecatedData() public mint setUpUnlockConditions {
-    //     vm.warp(block.timestamp + 1 hours + 1);
-    //     vm.expectRevert(abi.encodeWithSelector(AsideChainlink.DeprecatedData.selector));
-    //     baseToken.unlock(_tokenIds());
-    // }
-
-    // function test_RevertWhen_unlock_WithInvalidSentiment() public mint update {
-    //     router.fulfillRequest(token, abi.encodePacked(sentiment + token.SENTIMENT_INTERVAL()), "");
-    //     vm.expectRevert(abi.encodeWithSelector(AsideBase.InvalidUnlock.selector, tokenId));
-    //     baseToken.unlock(_tokenIds());
-    // }
     // #endregion
 }
