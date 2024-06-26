@@ -6,7 +6,7 @@ import {AsideBaseERC721Test} from "../helpers/AsideBase/tests/ERC721/AsideBase.E
 
 contract Aside0x02BaseERC721Test is Aside0x02TestHelper, AsideBaseERC721Test {
     function test_metadata() public {
-        assertEq(baseToken.name(), "Ray Marching the Moon");
+        assertEq(baseToken.name(), "Ray Marching the Moon: Full & New");
         assertEq(baseToken.symbol(), "MOON");
     }
 }

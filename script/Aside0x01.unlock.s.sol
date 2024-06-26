@@ -9,7 +9,7 @@ contract Aside0x01Unlock is Script {
         vm.startBroadcast();
         Aside0x01 token = Aside0x01(deployed);
         uint256[] memory tokenIds = new uint256[](1);
-        tokenIds[0] = 100;
+        tokenIds[0] = 101;
         // tokenIds[1] = 61;
         // tokenIds[2] = 62;
         // tokenIds[3] = 63;
