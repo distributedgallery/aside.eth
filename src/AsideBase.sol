@@ -138,7 +138,7 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
         return BASE_URI;
     }
 
-    function _areAllUnlocked() internal view returns (bool) {
+    function _areAllUnlocked() internal view virtual returns (bool) {
         return block.timestamp >= TIMELOCK_DEADLINE || _eUnlocked;
     }
 

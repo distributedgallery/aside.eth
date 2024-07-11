@@ -2,16 +2,13 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Script.sol";
-import {Aside0x02} from "../src/Aside0x02.sol";
+import {Aside0x03} from "../src/Aside0x03.sol";
 
-contract Aside0x02Mint is Script {
+contract Aside0x03Mint is Script {
     function run(address deployed, address receiver) external {
         vm.startBroadcast();
-        Aside0x02 token = Aside0x02(deployed);
-        for (uint256 i = 0; i < 120; i++) {
-            token.mint(receiver, i);
-        }
-
+        Aside0x03 token = Aside0x03(deployed);
+        token.mint(receiver, 2);
         vm.stopBroadcast();
     }
 }
