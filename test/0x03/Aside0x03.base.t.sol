@@ -7,7 +7,7 @@ import {AsideBaseTest} from "../helpers/AsideBase/tests/AsideBase.t.sol";
 contract Aside0x03BaseTest is Aside0x03TestHelper, AsideBaseTest {
     // #region NB_OF_TOKENS
     function test_NB_OF_TOKENS() public {
-        assertEq(baseToken.NB_OF_TOKENS(), 100);
+        assertEq(baseToken.NB_OF_TOKENS(), 210);
     }
     // #endregion
 

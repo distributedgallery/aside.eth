@@ -25,20 +25,20 @@ contract Aside0x03 is AsideBase {
      * @param feed_ The address of Chainlink's ETH / USD price feed.
      */
     constructor(string memory baseURI_, address admin_, address minter_, address verse_, uint256 timelock_, address feed_)
-        AsideBase("10K Drop", "10K", baseURI_, 100, admin_, minter_, verse_, timelock_)
+        AsideBase("10K Drop", "10K", baseURI_, 210, admin_, minter_, verse_, timelock_)
     {
-        // _aMint(0x4D3DfD28AA35869D52C5cE077Aa36E3944b48d1C, 120);
-        // _aMint(0x4CD7d2004a323133330D5A62aD7C734fAfD35236, 121);
-        // _aMint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, 122);
-        // _aMint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, 123);
-        // _aMint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, 124);
-        // _aMint(0x4D3DfD28AA35869D52C5cE077Aa36E3944b48d1C, 125);
-        // _aMint(0x4CD7d2004a323133330D5A62aD7C734fAfD35236, 126);
-        // _aMint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, 127);
-        // _aMint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, 128);
-        // _aMint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, 129);
-        // _aMint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, 1);
         feed = AggregatorV3Interface(feed_);
+
+        _aMint(0x4D3DfD28AA35869D52C5cE077Aa36E3944b48d1C, 200);
+        _aMint(0x4CD7d2004a323133330D5A62aD7C734fAfD35236, 201);
+        _aMint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, 202);
+        _aMint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, 203);
+        _aMint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, 204);
+        _aMint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, 205);
+        _aMint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, 206);
+        _aMint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, 207);
+        _aMint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, 208);
+        _aMint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, 209);
     }
 
     /**
@@ -86,8 +86,9 @@ contract Aside0x03 is AsideBase {
         return _unlocked || super._areAllUnlocked();
     }
 
-    function _isUnlocked(uint256 /*tokenId*/ ) internal view override returns (bool) {
-        return _areAllUnlocked();
+    function _afterMint(address receiver, uint256 tokenId) internal override {
+        if (tokenId > 201) _unlock(tokenId);
+        super._afterMint(receiver, tokenId);
     }
     // #endregion
 }
