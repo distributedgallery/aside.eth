@@ -66,6 +66,21 @@ abstract contract SafeTransferFrom is AsideBaseTestHelper {
         vm.prank(recipient);
         baseToken.safeTransferFrom(verse, recipient, tokenId);
     }
+
+    function test_safeTransferFrom_ForLockedTokenOwnedByDG() public {
+        _mint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6);
+        vm.prank(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6);
+        baseToken.safeTransferFrom(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, recipient, tokenId);
+
+        assertEq(baseToken.ownerOf(tokenId), recipient);
+        assertEq(baseToken.balanceOf(recipient), 1);
+        // assertEq(baseToken.balanceOf(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6), 0);
+        assertFalse(baseToken.isUnlocked(tokenId));
+
+        vm.expectRevert(abi.encodeWithSelector(AsideBase.TokenLocked.selector, tokenId));
+        vm.prank(recipient);
+        baseToken.safeTransferFrom(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, recipient, tokenId);
+    }
     // #endregion
 
     // #region ERC721Recipient
