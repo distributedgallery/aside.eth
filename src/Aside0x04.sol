@@ -96,7 +96,7 @@ contract Aside0x04 is AsideChainlink {
 
     // #region internal hook functions
     function _afterUpdate(bytes32, /*requestId*/ string[] memory /*args*/ ) internal virtual override {
-        // revert if already unlocked ?
+        if (_unlocked) revert AlreadyUnlocked();
     }
     // #endregion
 
