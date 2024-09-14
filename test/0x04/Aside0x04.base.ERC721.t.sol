@@ -6,7 +6,7 @@ import {AsideBaseERC721Test} from "../helpers/AsideBase/tests/ERC721/AsideBase.E
 
 contract Aside0x04BaseERC721Test is Aside0x04TestHelper, AsideBaseERC721Test {
     function test_metadata() public {
-        assertEq(baseToken.name(), "FELL-CLOUD");
-        assertEq(baseToken.symbol(), "FC");
+        assertEq(baseToken.name(), "FELL-CLOUD by Travess Smalley");
+        assertEq(baseToken.symbol(), "FELL-CLOUD");
     }
 }

@@ -41,8 +41,8 @@ contract Aside0x04 is AsideChainlink {
         string memory source_
     )
         AsideChainlink(
+            "FELL-CLOUD by Travess Smalley",
             "FELL-CLOUD",
-            "FC",
             baseURI_,
             36,
             admin_,
