@@ -55,6 +55,11 @@ abstract contract AsideBaseTestHelper is Test {
         baseToken.mint(owner, tokenId);
     }
 
+    function _mint(uint256 _tokenId) internal {
+        vm.prank(minter);
+        baseToken.mint(owner, _tokenId);
+    }
+
     function _mintBatch() internal {
         address[] memory to = new address[](2);
         uint256[] memory tokenIds = new uint256[](2);
