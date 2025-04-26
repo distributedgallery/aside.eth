@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 import {Test, console} from "forge-std/Test.sol";
-import {ERC721GeneralSequence} from "hl-evm-contracts/erc721/ERC721GeneralSequence.sol";
+import {ERC721Base, ERC721GeneralSequence} from "hl-evm-contracts/erc721/ERC721GeneralSequence.sol";
 import {IRoyaltyManager} from "hl-evm-contracts/royaltyManager/interfaces/IRoyaltyManager.sol";
 import {Observability} from "hl-evm-contracts/observability/Observability.sol";
 
@@ -49,5 +49,81 @@ contract AsideTokenManagerTest is Test {
 
     function test_owner() public {
         assertEq(manager.owner(), address(this));
+    }
+
+    // test ownership management
+
+    function test_setBaseURI() public {
+        vm.prank(creator);
+        token.setBaseURI("ipfs://newURI");
+        assertEq(token.baseURI(), "ipfs://newURI");
+    }
+
+    function test_RevertWhen_setBaseURI_FromUnauthorized() public {
+        vm.expectRevert(ERC721Base.Unauthorized.selector);
+        token.setBaseURI("ipfs://newURI");
+    }
+
+    function test_setDefaultTokenManager() public {
+        AsideTokenManager m = new AsideTokenManager();
+
+        vm.prank(creator);
+        token.setDefaultTokenManager(address(m));
+        assertEq(token.tokenManager(0), address(m));
+    }
+
+    function test_RevertWhen_setDefaultTokenManager_FromUnauthorized() public {
+        AsideTokenManager m = new AsideTokenManager();
+        vm.expectRevert(ERC721Base.ManagerSwapBlocked.selector);
+        token.setDefaultTokenManager(address(m));
+    }
+
+    function test_setGranularTokenManager() public {
+        AsideTokenManager m = new AsideTokenManager();
+        uint256[] memory tokenIds = new uint256[](1);
+        address[] memory tokenManagers = new address[](1);
+        tokenIds[0] = 1;
+        tokenManagers[0] = address(m);
+
+        vm.prank(creator);
+        token.setGranularTokenManagers(tokenIds, tokenManagers);
+        assertEq(token.tokenManager(1), address(m));
+    }
+
+    function test_RevertWhen_setGranularTokenManager_FromUnauthorized() public {
+        AsideTokenManager m = new AsideTokenManager();
+        uint256[] memory tokenIds = new uint256[](1);
+        address[] memory tokenManagers = new address[](1);
+        tokenIds[0] = 1;
+        tokenManagers[0] = address(m);
+        vm.expectRevert(ERC721Base.ManagerSwapBlocked.selector);
+        token.setGranularTokenManagers(tokenIds, tokenManagers);
+    }
+
+    function test_removeDefaultTokenManager() public {
+        vm.prank(creator);
+        token.removeDefaultTokenManager();
+        assertEq(token.tokenManager(0), address(0));
+    }
+
+    function test_RevertWhen_removeDefaultTokenManager_FromUnauthorized()
+        public
+    {
+        vm.expectRevert(ERC721Base.ManagerRemoveBlocked.selector);
+        token.removeDefaultTokenManager();
+    }
+
+    function test_unlock() public {
+        assertFalse(manager.isUnlocked(4));
+        manager.unlock(4);
+        assertTrue(manager.isUnlocked(4));
+    }
+
+    function test_lock() public {
+        assertFalse(manager.isUnlocked(1));
+        manager.unlock(4);
+        assertTrue(manager.isUnlocked(4));
+        manager.lock(4);
+        assertFalse(manager.isUnlocked(4));
     }
 }
