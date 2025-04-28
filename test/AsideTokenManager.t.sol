@@ -230,4 +230,50 @@ contract AsideTokenManagerTest is Test {
         vm.prank(attacker);
         manager.lock(1);
     }
+
+    function test_transferFrom_WhenUnlocked() public {
+        vm.prank(minter);
+        token.mintOneToOneRecipient(recipient);
+        assertEq(token.ownerOf(1), recipient);
+
+        manager.unlock(1);
+
+        vm.prank(recipient);
+        token.transferFrom(recipient, address(0xf), 1);
+
+        assertEq(token.ownerOf(1), address(0xf));
+    }
+
+    function test_RevertWhen_transferFrom_WhenLocked() public {
+        vm.prank(minter);
+        token.mintOneToOneRecipient(recipient);
+        assertEq(token.ownerOf(1), recipient);
+
+        vm.prank(recipient);
+        vm.expectRevert(AsideTokenManager.TokenLocked.selector);
+        token.transferFrom(recipient, address(0xf), 1);
+    }
+
+    function test_safeTransferFrom_WhenUnlocked() public {
+        vm.prank(minter);
+        token.mintOneToOneRecipient(recipient);
+        assertEq(token.ownerOf(1), recipient);
+
+        manager.unlock(1);
+
+        vm.prank(recipient);
+        token.safeTransferFrom(recipient, address(0xf), 1);
+
+        assertEq(token.ownerOf(1), address(0xf));
+    }
+
+    function test_RevertWhen_safeTransferFrom_WhenLocked() public {
+        vm.prank(minter);
+        token.mintOneToOneRecipient(recipient);
+        assertEq(token.ownerOf(1), recipient);
+
+        vm.prank(recipient);
+        vm.expectRevert(AsideTokenManager.TokenLocked.selector);
+        token.safeTransferFrom(recipient, address(0xf), 1);
+    }
 }
