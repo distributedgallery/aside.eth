@@ -205,6 +205,20 @@ contract AsideTokenManagerTest is Test {
     // #endregion
 
     // #region lock / unlock
+    function test_unlock_WhenTimelockDurationHasPassed() public {
+        assertFalse(manager.isUnlocked(1));
+        vm.warp(block.timestamp + 12 * 365 days);
+        assertTrue(manager.isUnlocked(1));
+
+        vm.prank(minter);
+        token.mintOneToOneRecipient(recipient);
+        assertEq(token.ownerOf(1), recipient);
+
+        vm.prank(recipient);
+        token.transferFrom(recipient, address(0xf), 1);
+        assertEq(token.ownerOf(1), address(0xf));
+    }
+
     function test_unlock() public {
         assertFalse(manager.isUnlocked(1));
         manager.unlock(1);
