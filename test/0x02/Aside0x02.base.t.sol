@@ -19,17 +19,21 @@ contract Aside0x02BaseTest is Aside0x02TestHelper, AsideBaseTest {
         }
         for (uint256 i = limit; i < 120; i++) {
             assertFalse(baseToken.isUnlocked(i));
-            vm.expectRevert(abi.encodeWithSelector(AsideBase.TokenLocked.selector, i));
+            vm.expectRevert(
+                abi.encodeWithSelector(AsideBase.TokenLocked.selector, i)
+            );
             vm.prank(owner);
             baseToken.transferFrom(owner, recipient, i);
         }
     }
+
     // #endregion
 
     // #region NB_OF_TOKENS
     function test_NB_OF_TOKENS() public {
         assertEq(baseToken.NB_OF_TOKENS(), 130);
     }
+
     // #endregion
 
     // #region unlock
@@ -135,7 +139,9 @@ contract Aside0x02BaseTest is Aside0x02TestHelper, AsideBaseTest {
     }
 
     function test_RevertWhen_unlock() public {
-        vm.expectRevert(abi.encodeWithSelector(Aside0x02.DisabledFunction.selector));
+        vm.expectRevert(
+            abi.encodeWithSelector(Aside0x02.DisabledFunction.selector)
+        );
         baseToken.unlock(_tokenIds());
     }
 

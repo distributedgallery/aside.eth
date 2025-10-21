@@ -9,11 +9,14 @@ contract Aside0x03BaseTest is Aside0x03TestHelper, AsideBaseTest {
     function test_NB_OF_TOKENS() public {
         assertEq(baseToken.NB_OF_TOKENS(), 210);
     }
+
     // #endregion
 
     // #region unlock
     function test_RevertWhen_unlock() public {
-        vm.expectRevert(abi.encodeWithSelector(Aside0x03.DisabledFunction.selector));
+        vm.expectRevert(
+            abi.encodeWithSelector(Aside0x03.DisabledFunction.selector)
+        );
         baseToken.unlock(_tokenIds());
     }
 

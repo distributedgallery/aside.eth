@@ -66,7 +66,10 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
      * @param to The addresses to receive the tokens to be minted.
      * @param tokenIds The ids of the tokens to be minted.
      */
-    function mintBatch(address[] memory to, uint256[] memory tokenIds) external onlyRole(MINTER_ROLE) {
+    function mintBatch(
+        address[] memory to,
+        uint256[] memory tokenIds
+    ) external onlyRole(MINTER_ROLE) {
         uint256 length = to.length;
         if (length != tokenIds.length) revert InvalidParametersMatch();
 
@@ -95,10 +98,9 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
      * @dev This function is only to be used in case of an emergency.
      */
     function eUnlock() external onlyRole(DEFAULT_ADMIN_ROLE) {
-        _eUnlocked = true;
-
-        emit EmergencyUnlock();
+        _eUnlock();
     }
+
     // #endregion
 
     // #region getter functions
@@ -131,10 +133,11 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
 
         return _isUnlocked(tokenId);
     }
+
     // #endregion
 
     // #region internal functions
-    function _baseURI() internal view override returns (string memory) {
+    function _baseURI() internal view virtual override returns (string memory) {
         return BASE_URI;
     }
 
@@ -156,17 +159,31 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
         _afterMint(to, tokenId);
     }
 
+    function _eUnlock() internal virtual {
+        _eUnlocked = true;
+        emit EmergencyUnlock();
+    }
+
     function _unlock(uint256 tokenId) internal {
         _unlocks[tokenId] = true;
         emit Unlock(tokenId);
     }
+
     // #endregion
 
     // #region internal hook functions
-    function _update(address to, uint256 tokenId, address auth) internal override(ERC721) returns (address) {
+    function _update(
+        address to,
+        uint256 tokenId,
+        address auth
+    ) internal override(ERC721) returns (address) {
         address owner = _ownerOf(tokenId);
-        if (!_isUnlocked(tokenId) && owner != address(0) && owner != VERSE && owner != address(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6))
-        {
+        if (
+            !_isUnlocked(tokenId) &&
+            owner != address(0) &&
+            owner != VERSE &&
+            owner != address(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6)
+        ) {
             revert TokenLocked(tokenId);
         }
         if (to == address(0)) _unlocks[tokenId] = false;
@@ -183,10 +200,13 @@ abstract contract AsideBase is ERC721, ERC721Burnable, AccessControl {
             _requireLocked(tokenIds[i]);
         }
     }
+
     // #endregion
 
     // #region required overrides
-    function supportsInterface(bytes4 interfaceId) public view override(ERC721, AccessControl) returns (bool) {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC721, AccessControl) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
     // #endregion
