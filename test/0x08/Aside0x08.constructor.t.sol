@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.25;
 
-import {AsideBase, Aside0x08TestHelper} from "./Aside0x08TestHelper.t.sol";
+import {Aside0x08TestHelper} from "./Aside0x08TestHelper.t.sol";
 
 contract Aside0x08Constructor is Aside0x08TestHelper {
     function test_constructor_APTokensAreMinted() public {

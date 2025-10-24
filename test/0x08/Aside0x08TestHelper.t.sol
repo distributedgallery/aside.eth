@@ -1,23 +1,93 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.25;
 
-import {AsideBase, AsideBaseTestHelper, IAccessControl, IERC721Errors} from "../helpers/AsideBase/AsideBaseTestHelper.t.sol";
+import {IAccessControl, IERC721Errors} from "../helpers/AsideBase/AsideBaseTestHelper.t.sol";
+import {Test} from "forge-std/Test.sol";
+
 import {Aside0x08} from "../../src/Aside0x08.sol";
 
-abstract contract Aside0x08TestHelper is AsideBaseTestHelper {
+abstract contract Aside0x08TestHelper is Test {
+    event Approval(
+        address indexed owner,
+        address indexed approved,
+        uint256 indexed tokenId
+    );
+    event ApprovalForAll(
+        address indexed owner,
+        address indexed operator,
+        bool approved
+    );
+    event EmergencyUnlock();
+    event Transfer(
+        address indexed from,
+        address indexed to,
+        uint256 indexed tokenId
+    );
+    event Unlock(uint256 indexed tokenId);
+
     Aside0x08 public token;
+    address public constant admin = address(0xA);
+    address public constant minter = address(0xB);
+    address public constant owner = address(0x01);
+    address public constant operator = address(0x02);
+    address public constant approved = address(0x03);
+    address public constant recipient = address(0x04);
+    address public constant verse = address(0x5);
+    uint256 public constant timelock = 365 days;
+    uint256 public constant tokenId = 12;
+    string public constant baseURI =
+        "ipfs://bafybeicy53j7e2er5kmft4rzj7ijr2cljgxxitnmmqztrdfst4i5z4pa74/";
+    string public constant tokenURI =
+        "ipfs://bafybeicy53j7e2er5kmft4rzj7ijr2cljgxxitnmmqztrdfst4i5z4pa74/12";
     string public constant baseURI2 =
         "ipfs://bafybeicy53j7e2er5kmft4rzj7ijr2cljgxxitnmmqztrdfst4i5z4pa74/2/";
 
+    string public constant tokenURI2 =
+        "ipfs://bafybeicy53j7e2er5kmft4rzj7ijr2cljgxxitnmmqztrdfst4i5z4pa74/2/12";
+
     function setUp() public {
-        token = new Aside0x08(
-            baseURI,
-            baseURI2,
-            admin,
-            minter,
-            verse,
-            timelock
-        );
-        baseToken = AsideBase(token);
+        token = new Aside0x08(baseURI, baseURI2, admin);
+    }
+
+    modifier mint() {
+        _mint();
+        _;
+    }
+
+    modifier unlock() {
+        vm.prank(admin);
+        token.unlock();
+        _;
+    }
+
+    function _tokenIds() public pure returns (uint256[] memory tokenIds) {
+        tokenIds = new uint256[](1);
+        tokenIds[0] = tokenId;
+    }
+
+    function _tokenIds(
+        uint256 _tokenId
+    ) public pure returns (uint256[] memory tokenIds) {
+        tokenIds = new uint256[](1);
+        tokenIds[0] = _tokenId;
+    }
+
+    function _reachTimelockDeadline() internal {
+        // vm.warp(baseToken.TIMELOCK_DEADLINE());
+    }
+
+    function _mint() internal {
+        vm.prank(minter);
+        token.mint(owner, tokenId);
+    }
+
+    function _mint(uint256 _tokenId) internal {
+        vm.prank(minter);
+        token.mint(owner, _tokenId);
+    }
+
+    function _mint(address to) internal {
+        vm.prank(minter);
+        token.mint(to, tokenId);
     }
 }
