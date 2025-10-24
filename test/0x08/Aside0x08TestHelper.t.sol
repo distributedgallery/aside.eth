@@ -2,9 +2,8 @@
 pragma solidity ^0.8.25;
 
 import {IAccessControl, IERC721Errors} from "../helpers/AsideBase/AsideBaseTestHelper.t.sol";
-import {Test} from "forge-std/Test.sol";
-
 import {Aside0x08} from "../../src/Aside0x08.sol";
+import {Test} from "forge-std/Test.sol";
 
 abstract contract Aside0x08TestHelper is Test {
     event Approval(
@@ -32,8 +31,6 @@ abstract contract Aside0x08TestHelper is Test {
     address public constant operator = address(0x02);
     address public constant approved = address(0x03);
     address public constant recipient = address(0x04);
-    address public constant verse = address(0x5);
-    uint256 public constant timelock = 365 days;
     uint256 public constant tokenId = 12;
     string public constant baseURI =
         "ipfs://bafybeicy53j7e2er5kmft4rzj7ijr2cljgxxitnmmqztrdfst4i5z4pa74/";
@@ -41,7 +38,6 @@ abstract contract Aside0x08TestHelper is Test {
         "ipfs://bafybeicy53j7e2er5kmft4rzj7ijr2cljgxxitnmmqztrdfst4i5z4pa74/12";
     string public constant baseURI2 =
         "ipfs://bafybeicy53j7e2er5kmft4rzj7ijr2cljgxxitnmmqztrdfst4i5z4pa74/2/";
-
     string public constant tokenURI2 =
         "ipfs://bafybeicy53j7e2er5kmft4rzj7ijr2cljgxxitnmmqztrdfst4i5z4pa74/2/12";
 
@@ -58,22 +54,6 @@ abstract contract Aside0x08TestHelper is Test {
         vm.prank(admin);
         token.unlock();
         _;
-    }
-
-    function _tokenIds() public pure returns (uint256[] memory tokenIds) {
-        tokenIds = new uint256[](1);
-        tokenIds[0] = tokenId;
-    }
-
-    function _tokenIds(
-        uint256 _tokenId
-    ) public pure returns (uint256[] memory tokenIds) {
-        tokenIds = new uint256[](1);
-        tokenIds[0] = _tokenId;
-    }
-
-    function _reachTimelockDeadline() internal {
-        // vm.warp(baseToken.TIMELOCK_DEADLINE());
     }
 
     function _mint() internal {

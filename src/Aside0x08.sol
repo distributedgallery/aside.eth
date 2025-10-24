@@ -43,23 +43,6 @@ contract Aside0x08 is ERC721, ERC721Burnable, AccessControl {
         _aMint(to, tokenId);
     }
 
-    // /**
-    //  * @notice Mints `tokenIds`, transfers them to `to` and checks for `to` acceptance.
-    //  * @param to The addresses to receive the tokens to be minted.
-    //  * @param tokenIds The ids of the tokens to be minted.
-    //  */
-    // function mintBatch(
-    //     address[] memory to,
-    //     uint256[] memory tokenIds
-    // ) external onlyRole(MINTER_ROLE) {
-    //     uint256 length = to.length;
-    //     if (length != tokenIds.length) revert InvalidParametersMatch();
-
-    //     for (uint256 i = 0; i < length; i++) {
-    //         _aMint(to[i], tokenIds[i]);
-    //     }
-    // }
-
     // #region admin-only functions
     /**
      * @notice Unlocks all the tokens at once.
@@ -69,7 +52,7 @@ contract Aside0x08 is ERC721, ERC721Burnable, AccessControl {
         if (_unlocked) revert AlreadyUnlocked();
 
         _unlocked = true;
-        emit BatchMetadataUpdate(0, this.NB_OF_TOKENS() - 1);
+        emit BatchMetadataUpdate(0, type(uint256).max);
         emit Unlock();
     }
 
@@ -77,8 +60,8 @@ contract Aside0x08 is ERC721, ERC721Burnable, AccessControl {
 
     // #region getter functions
     /**
-     * @notice Checks whether all the tokens have been unlocked at once.
-     * @return A boolean indicating whether all the tokens have been unlocked at once or not.
+     * @notice Checks whether all the tokens have been unlocked.
+     * @return A boolean indicating whether all the tokens have been unlocked or not.
      */
     function isUnlocked() public view returns (bool) {
         return _unlocked;
@@ -87,7 +70,7 @@ contract Aside0x08 is ERC721, ERC721Burnable, AccessControl {
     // #endregion
 
     // #region internal functions
-    function _baseURI() internal view virtual override returns (string memory) {
+    function _baseURI() internal view override returns (string memory) {
         if (_unlocked) {
             return BASE_URI_AFTER_DEATH;
         } else {
@@ -95,7 +78,7 @@ contract Aside0x08 is ERC721, ERC721Burnable, AccessControl {
         }
     }
 
-    function _isUnlocked() internal view virtual returns (bool) {
+    function _isUnlocked() internal view returns (bool) {
         return _unlocked;
     }
 
@@ -123,7 +106,7 @@ contract Aside0x08 is ERC721, ERC721Burnable, AccessControl {
         return super._update(to, tokenId, auth);
     }
 
-    function _afterMint(address, uint256 tokenId) internal virtual {
+    function _afterMint(address, uint256 tokenId) internal pure {
         if (tokenId >= NB_OF_TOKENS) revert InvalidTokenId(tokenId);
     }
 
@@ -132,7 +115,7 @@ contract Aside0x08 is ERC721, ERC721Burnable, AccessControl {
     // #region required overrides
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(ERC721, AccessControl) returns (bool) {
+    ) public view override(ERC721, AccessControl) returns (bool) {
         return
             interfaceId == bytes4(0x49064906) ||
             super.supportsInterface(interfaceId);
