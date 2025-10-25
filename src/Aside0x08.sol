@@ -4,18 +4,27 @@ pragma solidity ^0.8.25;
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Burnable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract Aside0x08 is ERC721, ERC721Burnable, AccessControl {
+contract Aside0x08 is ERC721, ERC721Burnable, AccessControl, ReentrancyGuard {
     error Locked();
     error AlreadyUnlocked();
-    error InvalidTokenId(uint256 tokenId);
+    error NoTokenLeft();
+    error InvalidPrice();
+    error SaleNotOpened();
 
     event BatchMetadataUpdate(uint256 _fromTokenId, uint256 _toTokenId); // https://eips.ethereum.org/EIPS/eip-4906
     event Unlock();
 
-    uint256 public constant NB_OF_TOKENS = 81; // APs inlcluded
+    bytes32 public constant UNLOCKER_ROLE = keccak256("UNLOCKER_ROLE");
+    uint256 public constant NB_OF_TOKENS = 81; // APs included
+    uint256 public constant PRICE = 0.1 ether;
     string public BASE_URI_BEFORE_DEATH; // strings cannot be immutable
     string public BASE_URI_AFTER_DEATH; // strings cannot be immutable
+
+    uint256 private count;
+    uint256 private _saleOpening = 1761955200;
+    bool private _isSalePaused = false;
     bool private _unlocked = false;
 
     /**
@@ -30,25 +39,48 @@ contract Aside0x08 is ERC721, ERC721Burnable, AccessControl {
         address admin_
     ) ERC721("Good Bye", "GDBY") {
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
+        _grantRole(UNLOCKER_ROLE, 0x48C4f1D069724349bDDDcce259f9a5356c7Ce10E);
+
         BASE_URI_BEFORE_DEATH = baseURIBeforeDeath_;
         BASE_URI_AFTER_DEATH = baseURIAfterDeath_;
+
+        // mint APs
+        // _aMint(0x4D3DfD28AA35869D52C5cE077Aa36E3944b48d1C, 120);
+    }
+
+    modifier saleOpened() {
+        // if (editionCount + amount > MINT_SUPPLY) revert MaxSupply();
+
+        // if (block.timestamp < saleFrom || salePaused) revert SaleNotOpened();
+
+        // if (amount > MAX_PER_TRANSACTION) revert DontBeGreedy();
+
+        _;
     }
 
     /**
-     * @notice Mints `tokenId`, transfers it to `to` and checks for `to` acceptance.
+     * @notice Mints `count`, transfers it to `to` and checks for `to` acceptance.
      * @param to The address to receive the token to be minted.
-     * @param tokenId The id of the token to be minted.
      */
-    function mint(address to, uint256 tokenId) external {
-        _aMint(to, tokenId);
+    function mint(address to) external payable nonReentrant {
+        if (!_isSaleOpened()) revert SaleNotOpened();
+        if (count >= NB_OF_TOKENS) revert NoTokenLeft();
+        // if (msg.value != amount * PRICE) revert IncorrectPrice();
+
+        _safeMint(to, count++);
+        count++;
     }
 
-    // #region admin-only functions
+    // function withdraw() {}
+
+    //////////////////////////////////////////////////////////
+    // Protected functions
+    //////////////////////////////////////////////////////////
     /**
      * @notice Unlocks all the tokens at once.
      * @dev This function is meant to be used only if Lauren dies.
      */
-    function unlock() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function unlock() external onlyRole(UNLOCKER_ROLE) {
         if (_unlocked) revert AlreadyUnlocked();
 
         _unlocked = true;
@@ -56,20 +88,66 @@ contract Aside0x08 is ERC721, ERC721Burnable, AccessControl {
         emit Unlock();
     }
 
-    // #endregion
-
-    // #region getter functions
     /**
-     * @notice Checks whether all the tokens have been unlocked.
+     * @notice Pauses sale.
+     */
+    function pauseSale() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _isSalePaused = true;
+    }
+
+    /**
+     * @notice Unpauses sale.
+     */
+    function unpauseSale() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _isSalePaused = false;
+    }
+
+    /**
+     * @notice Sets when the sale opens.
+     * @param from The timestamp of the sale's opening.
+     */
+    function setSaleOpening(uint256 from) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        _saleOpening = from;
+    }
+
+    //////////////////////////////////////////////////////////
+    // Getter functions
+    //////////////////////////////////////////////////////////
+    /**
+     * @notice Checks whether all the tokens have been unlocked or not.
      * @return A boolean indicating whether all the tokens have been unlocked or not.
      */
     function isUnlocked() public view returns (bool) {
         return _unlocked;
     }
 
-    // #endregion
+    /**
+     * @notice Returns a timestamp of the sale opening.
+     * @return A timestamp of the sale opening.
+     */
+    function saleOpening() public view returns (uint256) {
+        return _saleOpening;
+    }
 
-    // #region internal functions
+    /**
+     * @notice Checks whether the sale is paused or not.
+     * @return A boolean indicating whether the sale is paused or not.
+     */
+    function isSalePaused() public view returns (bool) {
+        return _isSalePaused;
+    }
+
+    /**
+     * @notice Checks whether the sale is opened or not.
+     * @return A boolean indicating whether the sale is opened or not.
+     */
+    function isSaleOpened() public view returns (bool) {
+        return _isSaleOpened();
+    }
+
+    //////////////////////////////////////////////////////////
+    // Internal functions
+    //////////////////////////////////////////////////////////
     function _baseURI() internal view override returns (string memory) {
         if (_unlocked) {
             return BASE_URI_AFTER_DEATH;
@@ -78,18 +156,17 @@ contract Aside0x08 is ERC721, ERC721Burnable, AccessControl {
         }
     }
 
+    function _isSaleOpened() internal view returns (bool) {
+        return !_isSalePaused && block.timestamp >= _saleOpening;
+    }
+
     function _isUnlocked() internal view returns (bool) {
         return _unlocked;
     }
 
-    function _aMint(address to, uint256 tokenId) internal {
-        _safeMint(to, tokenId);
-        _afterMint(to, tokenId);
-    }
-
-    // #endregion
-
-    // #region internal hook functions
+    //////////////////////////////////////////////////////////
+    // Internal hook functions
+    //////////////////////////////////////////////////////////
     function _update(
         address to,
         uint256 tokenId,
@@ -106,13 +183,9 @@ contract Aside0x08 is ERC721, ERC721Burnable, AccessControl {
         return super._update(to, tokenId, auth);
     }
 
-    function _afterMint(address, uint256 tokenId) internal pure {
-        if (tokenId >= NB_OF_TOKENS) revert InvalidTokenId(tokenId);
-    }
-
-    // #endregion
-
-    // #region required overrides
+    //////////////////////////////////////////////////////////
+    // Override functions
+    //////////////////////////////////////////////////////////
     function supportsInterface(
         bytes4 interfaceId
     ) public view override(ERC721, AccessControl) returns (bool) {
@@ -120,5 +193,4 @@ contract Aside0x08 is ERC721, ERC721Burnable, AccessControl {
             interfaceId == bytes4(0x49064906) ||
             super.supportsInterface(interfaceId);
     }
-    // #endregion
 }
