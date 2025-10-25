@@ -61,12 +61,12 @@ abstract contract Aside0x08TestHelper is Test {
     function _mint() internal {
         vm.warp(token.saleOpening());
         vm.prank(minter);
-        token.mint(owner);
+        token.mint{value: token.PRICE()}(owner);
     }
 
     function _mint(address to) internal {
         vm.warp(token.saleOpening());
         vm.prank(minter);
-        token.mint(to);
+        token.mint{value: token.PRICE()}(to);
     }
 }

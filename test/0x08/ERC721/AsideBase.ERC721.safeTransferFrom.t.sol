@@ -48,6 +48,9 @@ abstract contract SafeTransferFrom is Aside0x08TestHelper {
 
     function test_safeTransferFrom_ForLockedTokenOwnedByDG() public {
         _mint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6);
+        uint256 balance = token.balanceOf(
+            0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6
+        );
         vm.prank(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6);
         token.safeTransferFrom(
             0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6,
@@ -59,7 +62,7 @@ abstract contract SafeTransferFrom is Aside0x08TestHelper {
         assertEq(token.balanceOf(recipient), 1);
         assertEq(
             token.balanceOf(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6),
-            0
+            balance - 1
         );
         assertFalse(token.isUnlocked());
 

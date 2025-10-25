@@ -17,12 +17,12 @@ contract Aside0x08 is ERC721, ERC721Burnable, AccessControl, ReentrancyGuard {
     event Unlock();
 
     bytes32 public constant UNLOCKER_ROLE = keccak256("UNLOCKER_ROLE");
-    uint256 public constant NB_OF_TOKENS = 81; // APs included
+    uint256 public constant NB_OF_TOKENS = 65; // APs NOT included
     uint256 public constant PRICE = 0.1 ether;
     string public BASE_URI_BEFORE_DEATH; // strings cannot be immutable
     string public BASE_URI_AFTER_DEATH; // strings cannot be immutable
 
-    uint256 private count;
+    uint256 private _count;
     uint256 private _saleOpening = 1761955200;
     bool private _isSalePaused = false;
     bool private _unlocked = false;
@@ -45,33 +45,22 @@ contract Aside0x08 is ERC721, ERC721Burnable, AccessControl, ReentrancyGuard {
         BASE_URI_AFTER_DEATH = baseURIAfterDeath_;
 
         // mint APs
-        // _aMint(0x4D3DfD28AA35869D52C5cE077Aa36E3944b48d1C, 120);
-    }
-
-    modifier saleOpened() {
-        // if (editionCount + amount > MINT_SUPPLY) revert MaxSupply();
-
-        // if (block.timestamp < saleFrom || salePaused) revert SaleNotOpened();
-
-        // if (amount > MAX_PER_TRANSACTION) revert DontBeGreedy();
-
-        _;
+        for (uint i = 65; i < 81; i++) {
+            _safeMint(0x3c7e48216C74D7818aB1Fd226e56C60C4D659bA6, i);
+        }
     }
 
     /**
-     * @notice Mints `count`, transfers it to `to` and checks for `to` acceptance.
+     * @notice Mints `_count`, transfers it to `to` and checks for `to` acceptance.
      * @param to The address to receive the token to be minted.
      */
     function mint(address to) external payable nonReentrant {
         if (!_isSaleOpened()) revert SaleNotOpened();
-        if (count >= NB_OF_TOKENS) revert NoTokenLeft();
-        // if (msg.value != amount * PRICE) revert IncorrectPrice();
+        if (_count >= NB_OF_TOKENS) revert NoTokenLeft();
+        if (msg.value != PRICE) revert InvalidPrice();
 
-        _safeMint(to, count++);
-        count++;
+        _safeMint(to, _count++);
     }
-
-    // function withdraw() {}
 
     //////////////////////////////////////////////////////////
     // Protected functions
@@ -106,8 +95,22 @@ contract Aside0x08 is ERC721, ERC721Burnable, AccessControl, ReentrancyGuard {
      * @notice Sets when the sale opens.
      * @param from The timestamp of the sale's opening.
      */
-    function setSaleOpening(uint256 from) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setSaleOpening(
+        uint256 from
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _saleOpening = from;
+    }
+
+    /**
+     * @notice Withdraws balance to `_to` address.
+     * @param _to The address to withdraw the balance to.
+     */
+    function withdraw(
+        address payable _to
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(_to != address(0));
+        (bool success, ) = _to.call{value: address(this).balance}("");
+        require(success);
     }
 
     //////////////////////////////////////////////////////////
@@ -143,6 +146,14 @@ contract Aside0x08 is ERC721, ERC721Burnable, AccessControl, ReentrancyGuard {
      */
     function isSaleOpened() public view returns (bool) {
         return _isSaleOpened();
+    }
+
+    /**
+     * @notice Returns the number of minted tokens [excluding APs].
+     * @return The number of minted tokens [excluding APs].
+     */
+    function editionCount() public view returns (uint256) {
+        return _count;
     }
 
     //////////////////////////////////////////////////////////
