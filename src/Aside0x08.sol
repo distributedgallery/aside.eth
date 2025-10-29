@@ -156,6 +156,31 @@ contract Aside0x08 is ERC721, ERC721Burnable, AccessControl, ReentrancyGuard {
         return _count;
     }
 
+    /**
+     * @notice Returns the token owners and their corresponding token IDs.
+     * @return An array of token owners and an array of their corresponding token IDs.
+     */
+    function tokenOwners() external view returns (address[] memory, uint256[] memory) {
+        address[] memory owners = new address[](editionCount() + 16);
+        uint256[] memory ids = new uint256[](editionCount() + 16);
+        uint256 counter;
+        for (uint256 i = 1; i <= editionCount(); i++) {
+            if (_ownerOf(i) != address(0)) {
+                owners[counter] = ownerOf(i);
+                ids[counter] = i;
+                counter++;
+            }
+        }
+        for (uint256 i = 65; i < 81; i++) {
+            if (_ownerOf(i) != address(0)) {
+                owners[counter] = ownerOf(i);
+                ids[counter] = i;
+                counter++;
+            }
+        }
+        return (owners, ids);
+    }
+
     //////////////////////////////////////////////////////////
     // Internal functions
     //////////////////////////////////////////////////////////
